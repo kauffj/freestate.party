@@ -440,7 +440,7 @@ def build():
 
     sat_address = saturdays_meta.get('address', '')
     sat_maps_url = 'https://www.google.com/maps/search/' + sat_address.replace(' ', '+') if sat_address else ''
-    sat_event_id = saturdays_meta.get('event_id', '')
+    sat_rsvp_url = saturdays_meta.get('rsvp_url', '')
 
     saturdays_content = f'''
     <section class="px-6 pt-32 pb-12 md:pt-40 md:pb-16">
@@ -455,7 +455,7 @@ def build():
 
     <section class="px-6 pb-8 md:pb-10 text-center">
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="./rsvp/" class="inline-flex items-center justify-center bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
+            <a href="{sat_rsvp_url}" class="inline-flex items-center justify-center bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
                 RSVP
             </a>
             <a href="{sat_maps_url}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 bg-dark-700 hover:bg-dark-600 text-dark-100 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
@@ -476,7 +476,7 @@ def build():
 
     <section class="px-6 pb-20 md:pb-28 text-center">
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="./rsvp/" class="inline-flex items-center justify-center bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
+            <a href="{sat_rsvp_url}" class="inline-flex items-center justify-center bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
                 RSVP
             </a>
             <a href="{sat_maps_url}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 bg-dark-700 hover:bg-dark-600 text-dark-100 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
@@ -498,127 +498,18 @@ def build():
         og_image=saturdays_meta.get('og_image', '')
     )
 
-    # --- Page 6: RSVP (standalone form at /saturday/rsvp/) ---
-    rsvp_meta = extract_meta(read_file(os.path.join(CONTENT_DIR, 'rsvp.md')))
-    rsvp_content = f'''
-    <section class="min-h-screen flex flex-col items-center justify-center px-6 py-24">
-        <div class="max-w-md w-full">
-
-            <!-- Form -->
-            <div id="rsvp-form-wrap">
-                <div class="divider mb-6"></div>
-                <h1 class="font-display text-3xl md:text-4xl font-bold text-dark-50 mb-2">RSVP</h1>
-                <p class="text-dark-300 mb-8">We&rsquo;ll see you Saturday.</p>
-                <form id="rsvp-form" class="space-y-5" novalidate>
-                    <input type="hidden" name="event_id" value="{sat_event_id}">
-                    <div>
-                        <label class="block text-sm font-medium text-dark-200 mb-1.5" for="rsvp-name">Name</label>
-                        <input id="rsvp-name" name="name" type="text" required autocomplete="name"
-                               class="form-input w-full bg-dark-800 border border-dark-600 text-dark-50 placeholder-dark-500 rounded-lg px-4 py-3"
-                               placeholder="Your name">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-dark-200 mb-1.5" for="rsvp-email">Email</label>
-                        <input id="rsvp-email" name="email" type="email" required autocomplete="email"
-                               class="form-input w-full bg-dark-800 border border-dark-600 text-dark-50 placeholder-dark-500 rounded-lg px-4 py-3"
-                               placeholder="you@example.com">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-dark-200 mb-1.5" for="rsvp-guests">
-                            Guests <span class="text-dark-500 font-normal">(optional)</span>
-                        </label>
-                        <select id="rsvp-guests" name="guests"
-                                class="form-input w-full bg-dark-800 border border-dark-600 text-dark-50 rounded-lg px-4 py-3">
-                            <option value="">Just me</option>
-                            <option value="1">+1</option>
-                            <option value="2">+2</option>
-                            <option value="3">+3</option>
-                            <option value="4">+4</option>
-                            <option value="5">+5</option>
-                        </select>
-                    </div>
-                    <p id="rsvp-error" class="hidden text-red-400 text-sm"></p>
-                    <button type="submit" id="rsvp-submit"
-                            class="w-full bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg py-4 rounded-lg transition-colors min-h-[48px]">
-                        Submit RSVP
-                    </button>
-                </form>
-            </div>
-
-            <!-- Success state -->
-            <div id="rsvp-success" class="hidden text-center py-8">
-                <svg class="mx-auto mb-6" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="9 12 11 14 15 10"/>
-                </svg>
-                <h2 class="font-display text-3xl font-bold text-dark-50 mb-3">You&rsquo;re on the list.</h2>
-                <p class="text-dark-300">We&rsquo;ll see you Saturday.</p>
-            </div>
-
-        </div>
-    </section>'''
-
-    rsvp_scripts = '''<script>
-        const RSVP_ENDPOINT = window.location.hostname === 'localhost'
-            ? 'http://localhost:3000/api/rsvp'
-            : 'https://app.freestate.party/api/rsvp';
-
-        document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('rsvp-submit');
-            const errorEl = document.getElementById('rsvp-error');
-
-            const name = document.getElementById('rsvp-name').value.trim();
-            const email = document.getElementById('rsvp-email').value.trim();
-            const guestsVal = document.getElementById('rsvp-guests').value;
-            const guests = guestsVal !== '' ? parseInt(guestsVal, 10) : null;
-            const eventId = document.querySelector('input[name="event_id"]').value || null;
-
-            if (!name || !email) {
-                errorEl.textContent = 'Name and email are required.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting\u2026';
-            errorEl.classList.add('hidden');
-
-            try {
-                const resp = await fetch(RSVP_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, guests, event_id: eventId }),
-                });
-
-                if (!resp.ok) {
-                    const data = await resp.json().catch(() => ({}));
-                    throw new Error(data.message || 'Something went wrong. Please try again.');
-                }
-
-                document.getElementById('rsvp-form-wrap').classList.add('hidden');
-                document.getElementById('rsvp-success').classList.remove('hidden');
-            } catch (err) {
-                errorEl.textContent = err.message;
-                errorEl.classList.remove('hidden');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit RSVP';
-            }
-        });
-    </script>'''
-
-    rsvp_html = build_page(
-        base,
-        page_title=rsvp_meta['title'],
-        page_description=rsvp_meta['description'],
-        og_title=rsvp_meta.get('og_title', rsvp_meta['title']),
-        page_content=rsvp_content,
-        page_scripts=rsvp_scripts,
-        active_nav=None,
-        base_path='../..',
-        og_url=f'{BASE_URL}/saturday/rsvp/',
-        og_image=rsvp_meta.get('og_image', '')
-    )
+    # --- Page 6: /saturday/rsvp/ redirect ---
+    rsvp_redirect_html = f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0; url={sat_rsvp_url}">
+<title>Redirecting...</title>
+</head>
+<body>
+<script>window.location.replace("{sat_rsvp_url}");</script>
+</body>
+</html>'''
 
     # --- Write all pages ---
     # Root page stays as index.html; all others become <name>/index.html for clean URLs
@@ -627,7 +518,7 @@ def build():
         'about/index.html': about_html,
         'events/index.html': events_html_page,
         'saturday/index.html': saturdays_html,
-        'saturday/rsvp/index.html': rsvp_html,
+        'saturday/rsvp/index.html': rsvp_redirect_html,
     }
 
     for filepath, html in pages.items():
