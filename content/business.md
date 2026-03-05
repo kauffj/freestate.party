@@ -6,6 +6,8 @@ noindex: true
 
 The Free State Party is a private membership club for liberty-minded individuals in New Hampshire. We organize social events, gatherings, and community-building activities for our members and prospective members.
 
+Free State Party is a trade name (DBA) of Aristillus Corp., a corporation registered in the State of New Hampshire. Aristillus Corp. does business as "Free State Party."
+
 ## Services
 
 We host regular events including our monthly Free State Saturday open gatherings and members-only social events. Membership is offered on a recurring basis and includes access to private events, our member community, and related activities.
