@@ -12,6 +12,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://freestate.party">
     <meta property="og:image" content="https://freestate.party/img/og-default.png">
+    <link rel="canonical" href="https://freestate.party">
 
     <!-- Favicon -->
     <link rel="icon" href="./img/favicon.svg" type="image/svg+xml">
@@ -143,6 +144,12 @@
             outline: none;
             border-color: #d4a017;
             box-shadow: 0 0 0 2px rgba(212, 160, 23, 0.25);
+        }
+
+        /* Focus ring for keyboard navigation */
+        :focus-visible {
+            outline: 2px solid #d4a017;
+            outline-offset: 2px;
         }
 
         /* Active nav link */

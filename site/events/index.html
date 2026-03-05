@@ -12,6 +12,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://freestate.party/events/">
     <meta property="og:image" content="https://freestate.party/img/og-default.png">
+    <link rel="canonical" href="https://freestate.party/events/">
 
     <!-- Favicon -->
     <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
@@ -143,6 +144,12 @@
             outline: none;
             border-color: #d4a017;
             box-shadow: 0 0 0 2px rgba(212, 160, 23, 0.25);
+        }
+
+        /* Focus ring for keyboard navigation */
+        :focus-visible {
+            outline: 2px solid #d4a017;
+            outline-offset: 2px;
         }
 
         /* Active nav link */
@@ -356,6 +363,30 @@
 
         // Set initial tabindex
         tabs.forEach((t, i) => t.setAttribute('tabindex', i === 0 ? '0' : '-1'));
+    </script>
+    <script type="application/ld+json">
+    [
+    {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "Free State Saturday",
+        "description": "The biggest monthly liberty gathering in New Hampshire. Food, families, and interesting, definitely-legal unrecorded conversation.",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "organizer": {
+            "@type": "Organization",
+            "name": "Free State Party",
+            "url": "https://freestate.party"
+        },
+        "location": {
+            "@type": "Place",
+            "name": "varying",
+            "address": {
+                "@type": "PostalAddress",
+                "addressRegion": "NH"
+            }
+        }
+    }
+]
     </script>
 </body>
 </html>

@@ -206,7 +206,7 @@ def parse_events(text):
             cards.append(card)
         return '\n                '.join(cards)
 
-    return render_cards(events['open'], is_open=True), render_cards(events['closed'])
+    return render_cards(events['open'], is_open=True), render_cards(events['closed']), events
 
 
 def parse_words(text):
@@ -224,6 +224,7 @@ def build_page(base, page_title, page_description, og_title, page_content,
     html = html.replace('\n    {{noindex_tag}}', noindex_tag)
     html = html.replace('{{og_title}}', og_title)
     html = html.replace('{{og_url}}', og_url or BASE_URL)
+    html = html.replace('{{canonical_url}}', og_url or BASE_URL)
     og_image_tag = f'<meta property="og:image" content="{BASE_URL}{og_image or "/img/og-default.png"}">'
     html = html.replace('{{og_image_tag}}', og_image_tag)
     html = html.replace('{{page_content}}', page_content)
@@ -265,7 +266,7 @@ def build():
 
     events_text = read_file(os.path.join(CONTENT_DIR, 'events.md'))
     events_meta = extract_meta(events_text)
-    open_events_html, closed_events_html = parse_events(events_text)
+    open_events_html, closed_events_html, events = parse_events(events_text)
 
     footer_text = read_file(os.path.join(CONTENT_DIR, 'footer.md'))
     footer_meta = extract_meta(footer_text)
@@ -461,13 +462,42 @@ def build():
         tabs.forEach((t, i) => t.setAttribute('tabindex', i === 0 ? '0' : '-1'));
     </script>'''
 
+    # Event structured data (schema.org)
+    event_schema_items = []
+    for event in events['open']:
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "name": event.get('title', ''),
+            "description": event.get('description', ''),
+            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+            "organizer": {
+                "@type": "Organization",
+                "name": "Free State Party",
+                "url": BASE_URL
+            }
+        }
+        if event.get('location'):
+            schema["location"] = {
+                "@type": "Place",
+                "name": event['location'],
+                "address": {"@type": "PostalAddress", "addressRegion": "NH"}
+            }
+        event_schema_items.append(schema)
+
+    event_schema_script = ''
+    if event_schema_items:
+        event_schema_script = f'\n    <script type="application/ld+json">\n    {json.dumps(event_schema_items, indent=4)}\n    </script>'
+
+    events_scripts_with_schema = events_scripts + event_schema_script
+
     events_html_page = build_page(
         base,
         page_title=events_meta['title'],
         page_description=events_meta['description'],
         og_title=events_meta.get('og_title', events_meta['title']),
         page_content=events_content,
-        page_scripts=events_scripts,
+        page_scripts=events_scripts_with_schema,
         active_nav='events',
         is_subdir=True,
         og_url=f'{BASE_URL}/events/',
@@ -500,7 +530,7 @@ def build():
             <a href="{sat_rsvp_url}" class="inline-flex items-center justify-center bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
                 RSVP
             </a>
-            <a href="{sat_maps_url}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 bg-dark-700 hover:bg-dark-600 text-dark-100 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
+            <a href="{sat_maps_url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-dark-700 hover:bg-dark-600 text-dark-100 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 Map
             </a>
@@ -509,7 +539,7 @@ def build():
 
     <section class="px-6 pb-8 md:pb-10">
         <div class="max-w-4xl mx-auto">
-            <a href="{sat_maps_url}" target="_blank" rel="noopener" class="block select-none">
+            <a href="{sat_maps_url}" target="_blank" rel="noopener noreferrer" class="block select-none">
                 <img src="{{{{base}}}}/img/saturdays-poster.jpg" alt="Free State Saturdays — this month's gathering"
                      class="w-full rounded-lg shadow-2xl hover:opacity-90 transition-opacity max-h-[80vh] object-contain">
             </a>
@@ -521,7 +551,7 @@ def build():
             <a href="{sat_rsvp_url}" class="inline-flex items-center justify-center bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
                 RSVP
             </a>
-            <a href="{sat_maps_url}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 bg-dark-700 hover:bg-dark-600 text-dark-100 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
+            <a href="{sat_maps_url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-dark-700 hover:bg-dark-600 text-dark-100 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 Map
             </a>
