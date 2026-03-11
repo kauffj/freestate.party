@@ -269,28 +269,15 @@ def render_api_event_cards(events):
         poster_url = normed['poster_url']
 
         if poster_url:
-            img_html = f'<img src="{poster_url}" alt="{title}" loading="lazy" class="w-full h-64 object-cover rounded-t-lg" onerror="this.onerror=null;this.src=\'{{{{base}}}}/img/logo.svg\';this.classList.remove(\'object-cover\');this.classList.add(\'object-contain\',\'bg-dark-800\',\'p-8\');">'
+            img_html = f'<img src="{poster_url}" alt="{title}" loading="lazy" class="w-full rounded-t-lg" onerror="this.onerror=null;this.src=\'{{{{base}}}}/img/logo.svg\';this.classList.add(\'object-contain\',\'bg-dark-800\',\'p-8\');">'
         else:
-            img_html = '<img src="{{base}}/img/logo.svg" alt="Free State Party" loading="lazy" class="w-full h-64 object-contain rounded-t-lg bg-dark-800 p-8">'
-
-        details = []
-        if time_str:
-            details.append(time_str)
-        if location:
-            details.append(location)
-        details_html = ''
-        if details:
-            details_html = f'<p class="text-dark-400 text-sm mb-2">{" &bull; ".join(details)}</p>'
+            img_html = '<img src="{{base}}/img/logo.svg" alt="Free State Party" loading="lazy" class="w-full aspect-[2/3] object-contain rounded-t-lg bg-dark-800 p-8">'
 
         card = f'''<div class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors">
                     {img_html}
-                    <div class="p-6">
-                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                            <h3 class="font-display text-xl font-bold text-dark-50">{title}</h3>
-                            <span class="text-gold-500 font-medium text-sm whitespace-nowrap">{date_str}</span>
-                        </div>
-                        {details_html}
-                        <p class="text-dark-300 leading-relaxed">{description}</p>
+                    <div class="px-4 py-3">
+                        <h3 class="font-display text-base font-bold text-dark-50 mb-1">{title}</h3>
+                        <p class="text-gold-500 text-sm font-medium">{date_str}</p>
                     </div>
                 </div>'''
         cards.append(card)
@@ -502,7 +489,7 @@ def build():
             </div>
 
             <!-- Open Events -->
-            <div id="events-open" class="events-panel grid gap-6" role="tabpanel" aria-labelledby="tab-open">
+            <div id="events-open" class="events-panel grid grid-cols-1 sm:grid-cols-2 gap-6" role="tabpanel" aria-labelledby="tab-open">
                 {open_events_html}
             </div>
 
