@@ -17,6 +17,10 @@ import json
 import os
 import re
 import shutil
+import urllib.request
+from datetime import datetime
+from html import escape
+from zoneinfo import ZoneInfo
 
 # Paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -124,89 +128,176 @@ def parse_sections(text):
     return meta, sections
 
 
-def parse_events(text):
-    """Parse events.md into open and closed event lists. Returns (open_cards, closed_cards)."""
-    lines = text.strip().split('\n')
-    section = None  # 'open' or 'closed'
-    events = {'open': [], 'closed': []}
-    current = {}
+API_BASE = 'https://app.freestate.party'
+EASTERN = ZoneInfo('America/New_York')
 
-    for line in lines:
-        stripped = line.strip()
-        if stripped.lower() == '## open events':
-            section = 'open'
+
+def fetch_api_events():
+    """Fetch events from the API. Returns a list of event dicts, or [] on failure."""
+    url = f'{API_BASE}/api/public/events'
+    try:
+        req = urllib.request.Request(url, headers={'Accept': 'application/json'})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            return data if isinstance(data, list) else []
+    except Exception as e:
+        print(f"  WARNING: Failed to fetch events from API: {e}")
+        return []
+
+
+def format_event_datetime(starts_at, ends_at):
+    """Convert ISO 8601 UTC timestamps to human-readable Eastern time.
+    Returns (date_str, time_str) e.g. ('Saturday, April 11, 2026', '5:00 PM – 10:00 PM')."""
+    start = datetime.fromisoformat(starts_at.replace('Z', '+00:00')).astimezone(EASTERN)
+    date_str = start.strftime('%A, %B %-d, %Y')
+
+    def fmt_time(dt):
+        return dt.strftime('%-I:%M %p')
+
+    time_str = fmt_time(start)
+    if ends_at:
+        end = datetime.fromisoformat(ends_at.replace('Z', '+00:00')).astimezone(EASTERN)
+        time_str = f'{fmt_time(start)} – {fmt_time(end)}'
+
+    return date_str, time_str
+
+
+def normalize_event(event):
+    """Extract, validate, and HTML-escape fields from a raw API event dict.
+    Returns a clean dict with display-ready fields, or None if critical fields are invalid."""
+    title = event.get('title', '')
+    starts_at = event.get('startsAt', '')
+
+    # Validate critical fields are strings
+    if not isinstance(title, str) or not title.strip():
+        return None
+    if not isinstance(starts_at, str) or not starts_at.strip():
+        return None
+
+    description = event.get('description', '')
+    location = event.get('location', '')
+    ends_at = event.get('endsAt', '')
+    poster_url = event.get('posterUrl', '')
+
+    # Validate non-critical fields are strings, default to empty
+    if not isinstance(description, str):
+        description = ''
+    if not isinstance(location, str):
+        location = ''
+    if not isinstance(ends_at, str):
+        ends_at = ''
+    if not isinstance(poster_url, str):
+        poster_url = ''
+
+    # Format datetime (may raise on malformed timestamps)
+    date_str, time_str = format_event_datetime(starts_at, ends_at)
+
+    full_poster_url = f'{API_BASE}{poster_url}' if poster_url else ''
+
+    return {
+        'title': escape(title),
+        'description': escape(description),
+        'location': escape(location),
+        'date_str': date_str,
+        'time_str': time_str,
+        'starts_at_raw': starts_at,
+        'ends_at_raw': ends_at,
+        'poster_url': escape(full_poster_url) if full_poster_url else '',
+        'location_raw': location,
+    }
+
+
+def parse_schema_address(location):
+    """Try to parse a location string into schema.org address components.
+    Expects format like '8025 S Willow Street, Manchester NH 03103'.
+    Returns a dict with PostalAddress fields."""
+    address = {
+        "@type": "PostalAddress",
+        "addressRegion": "NH",
+        "addressCountry": "US"
+    }
+    if not location or ',' not in location:
+        address["streetAddress"] = location or ''
+        return address
+
+    try:
+        parts = [p.strip() for p in location.split(',', 1)]
+        address["streetAddress"] = parts[0]
+        # Try to parse "City ST ZIP" from second part
+        remainder = parts[1].strip()
+        # Match patterns like "Manchester NH 03103" or "Manchester NH"
+        m = re.match(r'^(.+?)\s+([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$', remainder)
+        if m:
+            address["addressLocality"] = m.group(1).strip()
+            address["addressRegion"] = m.group(2)
+            address["postalCode"] = m.group(3)
+        else:
+            # Try without zip: "Manchester NH"
+            m2 = re.match(r'^(.+?)\s+([A-Z]{2})$', remainder)
+            if m2:
+                address["addressLocality"] = m2.group(1).strip()
+                address["addressRegion"] = m2.group(2)
+            else:
+                # Fall back: put remainder into locality
+                address["addressLocality"] = remainder
+    except Exception:
+        address["streetAddress"] = location
+    return address
+
+
+def render_api_event_cards(events):
+    """Render API event dicts into HTML cards with prominent poster images."""
+    if not events:
+        return '<p class="text-dark-300 text-lg">No upcoming events scheduled. Check back soon!</p>'
+
+    cards = []
+    for event in events:
+        try:
+            normed = normalize_event(event)
+            if normed is None:
+                print(f"  WARNING: Skipping event with invalid critical fields: {event.get('title', '<no title>')}")
+                continue
+        except Exception as e:
+            print(f"  WARNING: Skipping event due to error: {e} (title: {event.get('title', '<no title>')})")
             continue
-        elif stripped.lower() == '## closed events':
-            if current and section:
-                events[section].append(current)
-                current = {}
-            section = 'closed'
-            continue
-        elif stripped.startswith('# '):
-            continue
 
-        # Skip lines before the first section heading
-        if section is None:
-            continue
+        title = normed['title']
+        description = normed['description']
+        location = normed['location']
+        date_str = normed['date_str']
+        time_str = normed['time_str']
+        poster_url = normed['poster_url']
 
-        if stripped.startswith('- title:'):
-            if current and section:
-                events[section].append(current)
-            current = {'title': stripped[8:].strip()}
-        elif stripped.startswith('date:'):
-            current['date'] = stripped[5:].strip()
-        elif stripped.startswith('time:'):
-            current['time'] = stripped[5:].strip()
-        elif stripped.startswith('location:'):
-            current['location'] = stripped[9:].strip()
-        elif stripped.startswith('description:'):
-            current['description'] = stripped[12:].strip()
-        elif stripped.startswith('link:'):
-            current['link'] = stripped[5:].strip()
+        if poster_url:
+            img_html = f'<img src="{poster_url}" alt="{title}" loading="lazy" class="w-full h-64 object-cover rounded-t-lg" onerror="this.onerror=null;this.src=\'{{{{base}}}}/img/logo.svg\';this.classList.remove(\'object-cover\');this.classList.add(\'object-contain\',\'bg-dark-800\',\'p-8\');">'
+        else:
+            img_html = '<img src="{{base}}/img/logo.svg" alt="Free State Party" loading="lazy" class="w-full h-64 object-contain rounded-t-lg bg-dark-800 p-8">'
 
-    if current and section:
-        events[section].append(current)
+        details = []
+        if time_str:
+            details.append(time_str)
+        if location:
+            details.append(location)
+        details_html = ''
+        if details:
+            details_html = f'<p class="text-dark-400 text-sm mb-2">{" &bull; ".join(details)}</p>'
 
-    def make_link(href):
-        """Convert internal absolute links to use {{base}} for relative resolution."""
-        if href.startswith('/'):
-            return '{{base}}' + href
-        return href
-
-    def render_cards(event_list, is_open=False):
-        cards = []
-        for event in event_list:
-            details = []
-            if event.get('time'):
-                details.append(event['time'])
-            if event.get('location'):
-                details.append(event['location'])
-            details_html = ''
-            if details:
-                details_html = f'<p class="text-dark-400 text-sm mb-2">{" &bull; ".join(details)}</p>'
-
-            link = make_link(event['link']) if event.get('link') else ''
-            link_html = ''
-            if link:
-                link_html = f'<a href="{link}" class="inline-block mt-3 text-gold-500 hover:text-gold-400 text-sm font-medium transition-colors">Learn more &rarr;</a>'
-
-            title_html = event.get('title', '')
-            if link:
-                title_html = f'<a href="{link}" class="hover:text-gold-500 transition-colors">{title_html}</a>'
-
-            card = f'''<div class="bg-dark-900 border border-dark-600 rounded-lg p-6 hover:border-gold-700/50 transition-colors">
-                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                        <h3 class="font-display text-xl font-bold text-dark-50">{title_html}</h3>
-                        <span class="text-gold-500 font-medium text-sm whitespace-nowrap">{event.get("date", "")}</span>
+        card = f'''<div class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors">
+                    {img_html}
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                            <h3 class="font-display text-xl font-bold text-dark-50">{title}</h3>
+                            <span class="text-gold-500 font-medium text-sm whitespace-nowrap">{date_str}</span>
+                        </div>
+                        {details_html}
+                        <p class="text-dark-300 leading-relaxed">{description}</p>
                     </div>
-                    {details_html}
-                    <p class="text-dark-300 leading-relaxed">{event.get("description", "")}</p>
-                    {link_html}
                 </div>'''
-            cards.append(card)
-        return '\n                '.join(cards)
+        cards.append(card)
 
-    return render_cards(events['open'], is_open=True), render_cards(events['closed']), events
+    if not cards:
+        return '<p class="text-dark-300 text-lg">No upcoming events scheduled. Check back soon!</p>'
+    return '\n                '.join(cards)
 
 
 def parse_words(text):
@@ -264,9 +355,8 @@ def build():
     about_text = read_file(os.path.join(CONTENT_DIR, 'about.md'))
     about_meta, about_sections = parse_sections(about_text)
 
-    events_text = read_file(os.path.join(CONTENT_DIR, 'events.md'))
-    events_meta = extract_meta(events_text)
-    open_events_html, closed_events_html, events = parse_events(events_text)
+    api_events = fetch_api_events()
+    open_events_html = render_api_event_cards(api_events)
 
     footer_text = read_file(os.path.join(CONTENT_DIR, 'footer.md'))
     footer_meta = extract_meta(footer_text)
@@ -394,7 +484,7 @@ def build():
     )
 
     # --- Page 3: Events (tabbed: open / closed) ---
-    events_h1 = events_meta.get('h1', 'Events')
+    events_h1 = 'Events'
     events_content = f'''
     <section class="px-6 pt-32 pb-20 md:pt-40 md:pb-28">
         <div class="max-w-3xl mx-auto">
@@ -462,14 +552,21 @@ def build():
         tabs.forEach((t, i) => t.setAttribute('tabindex', i === 0 ? '0' : '-1'));
     </script>'''
 
-    # Event structured data (schema.org)
+    # Event structured data (schema.org) — reuse normalized events
     event_schema_items = []
-    for event in events['open']:
+    for event in api_events:
+        try:
+            normed = normalize_event(event)
+            if normed is None:
+                continue
+        except Exception:
+            continue
+
         schema = {
             "@context": "https://schema.org",
             "@type": "Event",
-            "name": event.get('title', ''),
-            "description": event.get('description', ''),
+            "name": normed['title'],
+            "description": normed['description'],
             "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
             "organizer": {
                 "@type": "Organization",
@@ -477,25 +574,32 @@ def build():
                 "url": BASE_URL
             }
         }
-        if event.get('location'):
+        if normed['starts_at_raw']:
+            schema["startDate"] = normed['starts_at_raw']
+        if normed['ends_at_raw']:
+            schema["endDate"] = normed['ends_at_raw']
+        if normed['location_raw']:
             schema["location"] = {
                 "@type": "Place",
-                "name": event['location'],
-                "address": {"@type": "PostalAddress", "addressRegion": "NH"}
+                "name": normed['location'],
+                "address": parse_schema_address(normed['location_raw'])
             }
+        if normed['poster_url']:
+            schema["image"] = normed['poster_url']
         event_schema_items.append(schema)
 
     event_schema_script = ''
     if event_schema_items:
-        event_schema_script = f'\n    <script type="application/ld+json">\n    {json.dumps(event_schema_items, indent=4)}\n    </script>'
+        json_ld = json.dumps(event_schema_items, indent=4).replace('</', '<\\/')
+        event_schema_script = f'\n    <script type="application/ld+json">\n    {json_ld}\n    </script>'
 
     events_scripts_with_schema = events_scripts + event_schema_script
 
     events_html_page = build_page(
         base,
-        page_title=events_meta['title'],
-        page_description=events_meta['description'],
-        og_title=events_meta.get('og_title', events_meta['title']),
+        page_title='Events — Free State Party',
+        page_description='Open and members-only events from the Free State Party in New Hampshire.',
+        og_title='Events — Free State Party',
         page_content=events_content,
         page_scripts=events_scripts_with_schema,
         active_nav='events',
