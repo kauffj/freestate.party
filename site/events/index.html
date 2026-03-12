@@ -192,8 +192,8 @@
 
             <!-- Desktop Nav -->
             <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-                <a href="../about/" class="text-dark-200 hover:text-gold-500 transition-colors">About</a>
                 <a href="../events/" class="nav-active hover:text-gold-500 transition-colors">Events</a>
+                <a href="../about/" class="text-dark-200 hover:text-gold-500 transition-colors">About</a>
                 <a href="../saturday/" class="bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold px-6 py-2.5 rounded-lg transition-colors min-h-[44px] flex items-center">Meet Us</a>
             </div>
 
@@ -211,8 +211,8 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-dark-900/95 backdrop-blur-lg border-t border-dark-700 px-4 pb-6">
             <div class="flex flex-col gap-1 pt-4 text-base font-medium">
-                <a href="../about/" class="mobile-link py-3 px-4 text-dark-200 hover:text-gold-500 rounded-lg transition-colors">About</a>
                 <a href="../events/" class="mobile-link py-3 px-4 nav-active hover:text-gold-500 rounded-lg transition-colors">Events</a>
+                <a href="../about/" class="mobile-link py-3 px-4 text-dark-200 hover:text-gold-500 rounded-lg transition-colors">About</a>
                 <a href="../saturday/" class="mobile-link mt-2 bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold px-6 py-3 rounded-lg text-center transition-colors">Meet Us</a>
             </div>
         </div>
@@ -238,6 +238,15 @@
 
             <!-- Open Events -->
             <div id="events-open" class="events-panel grid grid-cols-1 sm:grid-cols-2 gap-6" role="tabpanel" aria-labelledby="tab-open">
+                <a href="https://app.freestate.party/rsvp/immigration" target="_blank" rel="noopener noreferrer" class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors no-underline text-inherit cursor-pointer block focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:outline-none">
+                    <img src="https://app.freestate.party/api/uploads/posters/0fb949d0-6995-41f4-8f60-f3ff1a77089d.webp" alt="A Deliberation on Immigration" loading="lazy" class="w-full rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('object-contain','bg-dark-800','p-8');">
+                    <div class="px-4 py-3">
+                        <h3 class="font-display text-base font-bold text-dark-50 mb-1">A Deliberation on Immigration</h3>
+                        <p class="text-gold-500 text-sm font-medium">Monday, March 30, 2026</p>
+                        
+                    </div>
+                    <span class="block px-4 pb-3 text-gold-500 text-xs font-semibold tracking-wide uppercase">RSVP &rarr;</span>
+                </a>
                 <a href="https://app.freestate.party/rsvp/saturday-april-2026" target="_blank" rel="noopener noreferrer" class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors no-underline text-inherit cursor-pointer block focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:outline-none">
                     <img src="https://app.freestate.party/api/uploads/posters/64cb2ade-4562-4b12-b91b-ac40f4753c80.webp" alt="Free State Saturday: April 2026" loading="lazy" class="w-full rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('object-contain','bg-dark-800','p-8');">
                     <div class="px-4 py-3">
@@ -265,8 +274,8 @@
                 Free State <span class="text-gold-500 ml-1">Party</span>
             </a>
             <div class="flex items-center gap-6 text-sm text-dark-300">
-                <a href="../about/" class="hover:text-dark-200 transition-colors">About</a>
                 <a href="../events/" class="hover:text-dark-200 transition-colors">Events</a>
+                <a href="../about/" class="hover:text-dark-200 transition-colors">About</a>
                 <a href="../saturday/" class="hover:text-gold-500 transition-colors">Meet Us</a>
                 <a href="../business/" class="hover:text-dark-200 transition-colors">Business</a>
             </div>
@@ -366,6 +375,32 @@
     </script>
     <script type="application/ld+json">
     [
+    {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "A Deliberation on Immigration",
+        "description": "",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "organizer": {
+            "@type": "Organization",
+            "name": "Free State Party",
+            "url": "https://freestate.party"
+        },
+        "startDate": "2026-03-30T18:00:00.000Z",
+        "endDate": "2026-03-30T21:00:00.000Z",
+        "location": {
+            "@type": "Place",
+            "name": "AFP Headquearters - 8025 S Willow St Suite #205",
+            "address": {
+                "@type": "PostalAddress",
+                "addressRegion": "NH",
+                "addressCountry": "US",
+                "streetAddress": "AFP Headquearters - 8025 S Willow St Suite #205"
+            }
+        },
+        "image": "https://app.freestate.party/api/uploads/posters/0fb949d0-6995-41f4-8f60-f3ff1a77089d.webp",
+        "url": "https://app.freestate.party/rsvp/immigration"
+    },
     {
         "@context": "https://schema.org",
         "@type": "Event",
