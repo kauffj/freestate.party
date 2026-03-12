@@ -201,7 +201,12 @@ def normalize_event(event):
     # Format datetime (may raise on malformed timestamps)
     date_str, time_str = format_event_datetime(starts_at, ends_at)
 
-    full_poster_url = f'{API_BASE}{poster_url}' if poster_url else ''
+    if poster_url and poster_url.startswith(('https://', 'http://')):
+        full_poster_url = poster_url
+    elif poster_url:
+        full_poster_url = f'{API_BASE}{poster_url}'
+    else:
+        full_poster_url = ''
 
     return {
         'title': escape(title),
