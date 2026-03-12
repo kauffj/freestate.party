@@ -178,6 +178,7 @@ def normalize_event(event):
     location = event.get('location', '')
     ends_at = event.get('endsAt', '')
     poster_url = event.get('posterUrl', '')
+    rsvp_url = event.get('rsvpUrl', '')
 
     # Validate non-critical fields are strings, default to empty
     if not isinstance(description, str):
@@ -188,6 +189,12 @@ def normalize_event(event):
         ends_at = ''
     if not isinstance(poster_url, str):
         poster_url = ''
+    if not isinstance(rsvp_url, str):
+        rsvp_url = ''
+
+    # Validate rsvp_url scheme — only allow http(s) to prevent XSS via javascript: etc.
+    if rsvp_url and not (rsvp_url.startswith('https://') or rsvp_url.startswith('http://')):
+        rsvp_url = ''
 
     # Format datetime (may raise on malformed timestamps)
     date_str, time_str = format_event_datetime(starts_at, ends_at)
@@ -204,6 +211,8 @@ def normalize_event(event):
         'ends_at_raw': ends_at,
         'poster_url': escape(full_poster_url) if full_poster_url else '',
         'location_raw': location,
+        'rsvp_url': escape(rsvp_url),
+        'rsvp_url_raw': rsvp_url,
     }
 
 
@@ -267,18 +276,28 @@ def render_api_event_cards(events):
         date_str = normed['date_str']
         time_str = normed['time_str']
         poster_url = normed['poster_url']
+        rsvp_url = normed['rsvp_url']
 
         if poster_url:
             img_html = f'<img src="{poster_url}" alt="{title}" loading="lazy" class="w-full rounded-t-lg" onerror="this.onerror=null;this.src=\'{{{{base}}}}/img/logo.svg\';this.classList.add(\'object-contain\',\'bg-dark-800\',\'p-8\');">'
         else:
             img_html = '<img src="{{base}}/img/logo.svg" alt="Free State Party" loading="lazy" class="w-full aspect-[2/3] object-contain rounded-t-lg bg-dark-800 p-8">'
 
-        card = f'''<div class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors">
-                    {img_html}
+        card_inner = f'''{img_html}
                     <div class="px-4 py-3">
                         <h3 class="font-display text-base font-bold text-dark-50 mb-1">{title}</h3>
                         <p class="text-gold-500 text-sm font-medium">{date_str}</p>
-                    </div>
+                    </div>'''
+
+        if rsvp_url:
+            rsvp_label = '<span class="block px-4 pb-3 text-gold-500 text-xs font-semibold tracking-wide uppercase">RSVP &rarr;</span>'
+            card = f'''<a href="{rsvp_url}" target="_blank" rel="noopener noreferrer" class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors no-underline text-inherit cursor-pointer block focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:outline-none">
+                    {card_inner}
+                    {rsvp_label}
+                </a>'''
+        else:
+            card = f'''<div class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors">
+                    {card_inner}
                 </div>'''
         cards.append(card)
 
@@ -573,6 +592,8 @@ def build():
             }
         if normed['poster_url']:
             schema["image"] = normed['poster_url']
+        if normed['rsvp_url_raw']:
+            schema["url"] = normed['rsvp_url_raw']
         event_schema_items.append(schema)
 
     event_schema_script = ''
