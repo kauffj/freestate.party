@@ -176,7 +176,7 @@
     <!-- Analytics -->
     <script defer data-domain="freestate.party" src="https://plausible.freestate.party/js/script.js"></script>
 </head>
-<body class="bg-dark-900 text-dark-100 antialiased">
+<body class="bg-dark-900 text-dark-100 antialiased min-h-screen flex flex-col">
 
     <!-- Skip to content -->
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:bg-gold-500 focus:text-dark-900 focus:px-4 focus:py-2 focus:rounded">Skip to content</a>
@@ -217,7 +217,7 @@
     </header>
 
     <!-- ========== PAGE CONTENT ========== -->
-    <main id="main">
+    <main id="main" class="flex-grow">
     
     <section class="px-6 pt-32 pb-20 md:pt-40 md:pb-28">
         <div class="max-w-3xl mx-auto">
@@ -258,7 +258,11 @@
 
             <!-- Closed Events -->
             <div id="events-closed" class="events-panel hidden" role="tabpanel" aria-labelledby="tab-closed">
-                <p class="text-2xl text-dark-200 font-display italic">Private.</p>
+                <div class="border border-dark-700 rounded-lg p-8 md:p-12 text-center max-w-lg mx-auto">
+                    <p class="font-display text-xl font-bold text-dark-50 mb-2">Members only.</p>
+                    <p class="text-dark-300 mb-6">Private dinners, strategy sessions, and more. Come to an open event first.</p>
+                    <a href="../events/#tab-open" onclick="document.getElementById('tab-open').click();return false;" class="inline-block bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold px-6 py-2.5 rounded-lg transition-colors text-sm">View Open Events</a>
+                </div>
             </div>
         </div>
     </section>

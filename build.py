@@ -554,7 +554,11 @@ def build():
 
             <!-- Closed Events -->
             <div id="events-closed" class="events-panel hidden" role="tabpanel" aria-labelledby="tab-closed">
-                <p class="text-2xl text-dark-200 font-display italic">Private.</p>
+                <div class="border border-dark-700 rounded-lg p-8 md:p-12 text-center max-w-lg mx-auto">
+                    <p class="font-display text-xl font-bold text-dark-50 mb-2">Members only.</p>
+                    <p class="text-dark-300 mb-6">Private dinners, strategy sessions, and more. Come to an open event first.</p>
+                    <a href="{{{{base}}}}/events/#tab-open" onclick="document.getElementById('tab-open').click();return false;" class="inline-block bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold px-6 py-2.5 rounded-lg transition-colors text-sm">View Open Events</a>
+                </div>
             </div>
         </div>
     </section>'''
