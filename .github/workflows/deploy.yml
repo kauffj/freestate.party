@@ -21,9 +21,6 @@ jobs:
       - name: Build site
         run: python3 build.py
 
-      - name: Save API hash
-        run: curl -sf https://app.freestate.party/api/public/events | sha256sum | cut -d' ' -f1 > site/events-hash.txt
-
       - name: Deploy via rsync
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}

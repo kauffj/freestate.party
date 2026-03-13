@@ -13,6 +13,7 @@ Output:
 Usage: python3 build.py
 """
 
+import hashlib
 import json
 import os
 import re
@@ -133,16 +134,19 @@ EASTERN = ZoneInfo('America/New_York')
 
 
 def fetch_api_events():
-    """Fetch events from the API. Returns a list of event dicts, or [] on failure."""
+    """Fetch events from the API. Returns (events_list, raw_bytes).
+    raw_bytes is the unmodified API response, used for change-detection hashing.
+    On failure, returns ([], b'')."""
     url = f'{API_BASE}/api/public/events'
     try:
         req = urllib.request.Request(url, headers={'Accept': 'application/json'})
         with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode('utf-8'))
-            return data if isinstance(data, list) else []
+            raw = resp.read()
+            data = json.loads(raw.decode('utf-8'))
+            return (data if isinstance(data, list) else [], raw)
     except Exception as e:
         print(f"  WARNING: Failed to fetch events from API: {e}")
-        return []
+        return ([], b'')
 
 
 def format_event_datetime(starts_at, ends_at):
@@ -401,7 +405,7 @@ def build():
     about_text = read_file(os.path.join(CONTENT_DIR, 'about.md'))
     about_meta, about_sections = parse_sections(about_text)
 
-    api_events = fetch_api_events()
+    api_events, api_raw = fetch_api_events()
     open_events_html = render_api_event_cards(api_events)
 
     footer_text = read_file(os.path.join(CONTENT_DIR, 'footer.md'))
@@ -825,6 +829,14 @@ def build():
         os.makedirs(os.path.join(SITE_DIR, 'video'), exist_ok=True)
         shutil.copy2(video_src, video_dst)
         print("  Copied: video/homepage.mp4")
+
+    # --- Write API hash from the same data used to build ---
+    if api_raw:
+        api_hash = hashlib.sha256(api_raw).hexdigest()
+        hash_path = os.path.join(SITE_DIR, 'events-hash.txt')
+        with open(hash_path, 'w') as f:
+            f.write(api_hash + '\n')
+        print(f"  Wrote: site/events-hash.txt ({api_hash[:12]}…)")
 
     print(f"\nDone. {len(pages)} pages built.")
     print(f"Words: {words}")

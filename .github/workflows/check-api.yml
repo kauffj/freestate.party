@@ -5,7 +5,7 @@ on:
     - cron: '*/5 * * * *'
 
 jobs:
-  check:
+  check-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Check for API changes
@@ -21,8 +21,31 @@ jobs:
             echo "No API changes"
           fi
 
-      - name: Trigger deploy
+      - uses: actions/checkout@v4
+        if: steps.compare.outputs.changed == 'true'
+
+      - uses: actions/setup-python@v5
+        if: steps.compare.outputs.changed == 'true'
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        if: steps.compare.outputs.changed == 'true'
+        run: pip install markdown
+
+      - name: Build site
+        if: steps.compare.outputs.changed == 'true'
+        run: python3 build.py
+
+      - name: Deploy via rsync
         if: steps.compare.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run deploy.yml --repo ${{ github.repository }}
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 147.182.191.226 >> ~/.ssh/known_hosts 2>/dev/null
+          rsync -avz --delete --exclude="video/" \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            site/ root@147.182.191.226:/var/www/freestate.party/
