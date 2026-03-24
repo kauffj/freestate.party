@@ -72,4 +72,4 @@ See `DECISIONS.md` for the full list. Key points:
 ## Domain & Hosting
 - **Domain**: freestate.party
 - **Hosting**: Digital Ocean (auto-deploy from GitHub `main`)
-- **Repo**: github.com/bargerwb/free-state-party
+- **Repo**: github.com/kauffj/freestate.party
