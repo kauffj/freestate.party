@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Founding — Free State Party</title>
+    <meta name="description" content="A private preview from the Free State Party.">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="The Founding">
+    <meta property="og:description" content="A private preview from the Free State Party.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://freestate.party/founding/">
+    <meta property="og:image" content="https://freestate.party/img/og-default.png">
+    <link rel="canonical" href="https://freestate.party/founding/">
+
+    <!-- Favicon -->
+    <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fefce8',
+                            100: '#fef9c3',
+                            200: '#fef08a',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#d4a017',
+                            600: '#b8860b',
+                            700: '#92700c',
+                            800: '#6b5210',
+                            900: '#422d08',
+                        },
+                        dark: {
+                            50: '#f8f8f8',
+                            100: '#e0e0e0',
+                            200: '#b0b0b0',
+                            300: '#808080',
+                            400: '#505050',
+                            500: '#2a2a2a',
+                            600: '#1f1f1f',
+                            700: '#181818',
+                            800: '#141414',
+                            900: '#0a0a0a',
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+        .gold-gradient {
+            background: linear-gradient(135deg, #d4a017 0%, #facc15 50%, #d4a017 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .divider {
+            width: 80px;
+            height: 3px;
+            background: #d4a017;
+        }
+
+        /* Video styling */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: rgba(10, 10, 10, 0.3);
+            border-radius: 0.5rem;
+            transition: background 200ms ease;
+            border: none;
+            padding: 0;
+        }
+        .video-overlay:hover {
+            background: rgba(10, 10, 10, 0.15);
+        }
+        .video-overlay svg {
+            transition: transform 200ms ease;
+        }
+        .video-overlay:hover svg {
+            transform: scale(1.1);
+        }
+
+        /* Focus ring for keyboard navigation */
+        :focus-visible {
+            outline: 2px solid #d4a017;
+            outline-offset: 2px;
+        }
+    </style>
+
+    <!-- Analytics -->
+    <script defer data-domain="freestate.party" src="https://plausible.freestate.party/js/script.js"></script>
+</head>
+<body class="bg-dark-900 text-dark-100 antialiased min-h-screen flex flex-col">
+    <main>
+    
+    <h1 class="sr-only">The Founding — Free State Party</h1>
+    <div class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+        <a href="../" class="mb-10 flex items-center gap-2">
+            <img src="../img/logo.svg" alt="Free State Party" width="32" height="32">
+            <span class="font-display text-xl text-white">Free State <span class="text-gold-500">Party</span></span>
+        </a>
+        <div class="w-full max-w-4xl">
+            <div class="video-container shadow-2xl">
+                <video data-video-player preload="metadata" playsinline>
+                    <source src="../video/promo.mp4" type="video/mp4">
+                </video>
+                <button data-video-play class="video-overlay text-gold-500" aria-label="Play video">
+                    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+                        <circle cx="36" cy="36" r="35" stroke="currentColor" stroke-width="2" class="fill-dark-900/60"/>
+                        <polygon points="28,20 28,52 54,36" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    </main>
+
+    <!-- Page-specific scripts -->
+    <script src="../js/video-player.js"></script>
+</body>
+</html>
