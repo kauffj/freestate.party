@@ -837,6 +837,7 @@ def build():
         founding_meta.get('og_title', founding_meta['title']),
         founding_content, founding_scripts,
         og_url=f'{BASE_URL}/founding/',
+        og_image=founding_meta.get('og_image', ''),
         noindex=True,
         is_subdir=True
     )
