@@ -236,10 +236,10 @@
             </div>
             <div class="mt-12 lg:mt-0">
                 <div class="video-container shadow-2xl" id="video-wrapper">
-                    <video id="hero-video" preload="metadata" playsinline>
+                    <video data-video-player preload="metadata" playsinline>
                         <source src="./video/homepage.mp4" type="video/mp4">
                     </video>
-                    <button id="video-play" class="video-overlay text-gold-500" aria-label="Play video">
+                    <button data-video-play class="video-overlay text-gold-500" aria-label="Play video">
                         <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
                             <circle cx="36" cy="36" r="35" stroke="currentColor" stroke-width="2" class="fill-dark-900/60"/>
                             <polygon points="28,20 28,52 54,36" fill="currentColor"/>
@@ -341,20 +341,7 @@
             paused = document.hidden;
         });
 
-        // Video player
-        const video = document.getElementById('hero-video');
-        const playBtn = document.getElementById('video-play');
-        if (video && playBtn) {
-            playBtn.addEventListener('click', () => {
-                playBtn.classList.add('hidden');
-                video.controls = true;
-                video.play();
-            });
-            video.addEventListener('ended', () => {
-                playBtn.classList.remove('hidden');
-                video.controls = false;
-            });
-        }
     </script>
+    <script src="./js/video-player.js"></script>
 </body>
 </html>

@@ -324,6 +324,30 @@ def parse_words(text):
     return [w.strip() for w in text.strip().split('\n') if w.strip()]
 
 
+def _render_minimal_page(template, page_title, page_description, og_title,
+                         page_content, page_scripts='', og_url='', og_image='',
+                         noindex=False, is_subdir=False, base_path=None):
+    """Render a page using the minimal template (no nav/footer)."""
+    html = template
+    html = html.replace('{{page_title}}', page_title)
+    html = html.replace('{{page_description}}', page_description)
+    noindex_tag = '\n    <meta name="robots" content="noindex, nofollow">' if noindex else ''
+    html = html.replace('\n    {{noindex_tag}}', noindex_tag)
+    html = html.replace('{{og_title}}', og_title)
+    html = html.replace('{{og_url}}', og_url or BASE_URL)
+    html = html.replace('{{canonical_url}}', og_url or BASE_URL)
+    og_image_tag = f'<meta property="og:image" content="{BASE_URL}{og_image or "/img/og-default.png"}">'
+    html = html.replace('{{og_image_tag}}', og_image_tag)
+    html = html.replace('{{page_content}}', page_content)
+    html = html.replace('{{page_scripts}}', page_scripts)
+    if base_path is not None:
+        resolved_base = base_path
+    else:
+        resolved_base = '..' if is_subdir else '.'
+    html = html.replace('{{base}}', resolved_base)
+    return html
+
+
 def build_page(base, page_title, page_description, og_title, page_content,
                page_scripts='', active_nav=None, is_subdir=False, base_path=None,
                og_url='', og_image='', noindex=False, footer=None):
@@ -431,10 +455,10 @@ def build():
             </div>
             <div class="mt-12 lg:mt-0">
                 <div class="video-container shadow-2xl" id="video-wrapper">
-                    <video id="hero-video" preload="metadata" playsinline>
+                    <video data-video-player preload="metadata" playsinline>
                         <source src="{{{{base}}}}/video/homepage.mp4" type="video/mp4">
                     </video>
-                    <button id="video-play" class="video-overlay text-gold-500" aria-label="Play video">
+                    <button data-video-play class="video-overlay text-gold-500" aria-label="Play video">
                         <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
                             <circle cx="36" cy="36" r="35" stroke="currentColor" stroke-width="2" class="fill-dark-900/60"/>
                             <polygon points="28,20 28,52 54,36" fill="currentColor"/>
@@ -467,21 +491,8 @@ def build():
             paused = document.hidden;
         }});
 
-        // Video player
-        const video = document.getElementById('hero-video');
-        const playBtn = document.getElementById('video-play');
-        if (video && playBtn) {{
-            playBtn.addEventListener('click', () => {{
-                playBtn.classList.add('hidden');
-                video.controls = true;
-                video.play();
-            }});
-            video.addEventListener('ended', () => {{
-                playBtn.classList.remove('hidden');
-                video.controls = false;
-            }});
-        }}
-    </script>'''
+    </script>
+    <script src="{{{{base}}}}/js/video-player.js"></script>'''
 
     home_html = build_page(
         base,
@@ -791,6 +802,45 @@ def build():
         footer=footer_meta
     )
 
+    # --- Page: /founding/ (minimal, unlisted, noindex — private promo video) ---
+    founding_text = read_file(os.path.join(CONTENT_DIR, 'founding.md'))
+    founding_meta = extract_meta(founding_text)
+
+    founding_content = '''
+    <h1 class="sr-only">The Founding — Free State Party</h1>
+    <div class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+        <a href="{{base}}/" class="mb-10 flex items-center gap-2">
+            <img src="{{base}}/img/logo.svg" alt="Free State Party" width="32" height="32">
+            <span class="font-display text-xl text-white">Free State <span class="text-gold-500">Party</span></span>
+        </a>
+        <div class="w-full max-w-4xl">
+            <div class="video-container shadow-2xl">
+                <video data-video-player preload="metadata" playsinline>
+                    <source src="{{base}}/video/promo.mp4" type="video/mp4">
+                </video>
+                <button data-video-play class="video-overlay text-gold-500" aria-label="Play video">
+                    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+                        <circle cx="36" cy="36" r="35" stroke="currentColor" stroke-width="2" class="fill-dark-900/60"/>
+                        <polygon points="28,20 28,52 54,36" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>'''
+
+    founding_scripts = '<script src="{{base}}/js/video-player.js"></script>'
+
+    # Build founding page using the minimal template (no nav/footer)
+    minimal_base = read_file(os.path.join(TEMPLATE_DIR, 'minimal.html'))
+    founding_html = _render_minimal_page(
+        minimal_base, founding_meta['title'], founding_meta['description'],
+        founding_meta.get('og_title', founding_meta['title']),
+        founding_content, founding_scripts,
+        og_url=f'{BASE_URL}/founding/',
+        noindex=True,
+        is_subdir=True
+    )
+
     # --- Write all pages ---
     # Root page stays as index.html; all others become <name>/index.html for clean URLs
     pages = {
@@ -799,6 +849,7 @@ def build():
         'events/index.html': events_html_page,
         'business/index.html': business_html,
         'saturday/index.html': saturdays_html,
+        'founding/index.html': founding_html,
     }
 
     # --- /saturday/rsvp/ redirect (only if we have an RSVP URL) ---
