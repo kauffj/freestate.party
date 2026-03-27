@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  repository_dispatch:
+    types: [events-changed]
 
 jobs:
   deploy:
@@ -32,3 +34,4 @@ jobs:
           rsync -avz --delete --exclude="video/" \
             -e "ssh -i ~/.ssh/deploy_key" \
             site/ root@147.182.191.226:/var/www/freestate.party/
+          ssh -i ~/.ssh/deploy_key root@147.182.191.226 'nginx -t && systemctl reload nginx'
