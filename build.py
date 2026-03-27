@@ -842,6 +842,27 @@ def build():
         is_subdir=True
     )
 
+    # --- Page: 404 (minimal, like /founding/) ---
+    notfound_text = read_file(os.path.join(CONTENT_DIR, '404.md'))
+    notfound_meta = extract_meta(notfound_text)
+    notfound_content = '''
+    <div class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+        <a href="{{base}}/" class="mb-10 flex items-center gap-2">
+            <img src="{{base}}/img/logo.svg" alt="Free State Party" width="32" height="32">
+            <span class="font-display text-xl text-white">Free State <span class="text-gold-500">Party</span></span>
+        </a>
+        <p class="text-lg text-dark-200">This page doesn't exist. Maybe it never did.</p>
+    </div>'''
+    notfound_html = _render_minimal_page(
+        minimal_base,
+        page_title=notfound_meta['title'],
+        page_description=notfound_meta['description'],
+        og_title=notfound_meta.get('og_title', notfound_meta['title']),
+        page_content=notfound_content,
+        noindex=True,
+        is_subdir=False
+    )
+
     # --- Write all pages ---
     # Root page stays as index.html; all others become <name>/index.html for clean URLs
     pages = {
@@ -851,6 +872,7 @@ def build():
         'business/index.html': business_html,
         'saturday/index.html': saturdays_html,
         'founding/index.html': founding_html,
+        '404.html': notfound_html,
     }
 
     # --- /saturday/rsvp/ redirect (only if we have an RSVP URL) ---
