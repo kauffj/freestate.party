@@ -23,7 +23,14 @@ server {
     error_page 404 /404.html;
 
     location / {
-        try_files $uri $uri/ =404;
+        try_files $uri $uri/ @backend;
+    }
+
+    location @backend {
+        proxy_pass https://app.freestate.party;
+        proxy_intercept_errors on;
+        proxy_set_header Host app.freestate.party;
+        proxy_set_header X-Real-IP $remote_addr;
     }
 
     # Cache static assets
