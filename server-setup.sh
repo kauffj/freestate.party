@@ -33,10 +33,11 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
     }
 
-    # Cache static assets
+    # Cache static assets (fall back to backend for app assets)
     location ~* \.(css|js|jpg|jpeg|png|gif|ico|svg|woff2?|ttf|mp4|webm)$ {
         expires 7d;
         add_header Cache-Control "public, immutable";
+        try_files $uri @backend;
     }
 }
 NGINX
