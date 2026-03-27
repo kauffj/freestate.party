@@ -27,17 +27,13 @@ server {
     }
 
     location @backend {
-        proxy_pass https://app.freestate.party;
-        proxy_intercept_errors on;
-        proxy_set_header Host app.freestate.party;
-        proxy_set_header X-Real-IP $remote_addr;
+        return 302 https://app.freestate.party$request_uri;
     }
 
-    # Cache static assets (fall back to backend for app assets)
+    # Cache static assets
     location ~* \.(css|js|jpg|jpeg|png|gif|ico|svg|woff2?|ttf|mp4|webm)$ {
         expires 7d;
         add_header Cache-Control "public, immutable";
-        try_files $uri @backend;
     }
 }
 NGINX
