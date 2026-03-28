@@ -860,7 +860,7 @@ def build():
         og_title=notfound_meta.get('og_title', notfound_meta['title']),
         page_content=notfound_content,
         noindex=True,
-        is_subdir=False
+        base_path=''
     )
 
     # --- Write all pages ---
