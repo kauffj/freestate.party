@@ -13,12 +13,34 @@ mkdir -p "$WEBROOT"
 echo "==> Creating empty known-routes.conf (will be populated on first deploy)"
 touch "$WEBROOT/known-routes.conf"
 
+echo "==> Installing certbot"
+apt-get update -qq
+apt-get install -y -qq certbot python3-certbot-nginx
+
+echo "==> Getting SSL certificate (certonly — we manage nginx config ourselves)"
+certbot certonly --nginx -d freestate.party -d www.freestate.party \
+    --non-interactive --agree-tos --email admin@freestate.party
+
 echo "==> Writing nginx config"
 cat > /etc/nginx/sites-available/$DOMAIN <<'NGINX'
+# HTTP → HTTPS redirect
 server {
     listen 80;
     listen [::]:80;
     server_name freestate.party www.freestate.party;
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS server
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name freestate.party www.freestate.party;
+
+    ssl_certificate /etc/letsencrypt/live/freestate.party/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/freestate.party/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     root /var/www/freestate.party;
 
@@ -70,12 +92,5 @@ nginx -t
 
 echo "==> Reloading nginx"
 systemctl reload nginx
-
-echo "==> Installing certbot"
-apt-get update -qq
-apt-get install -y -qq certbot python3-certbot-nginx
-
-echo "==> Getting SSL certificate"
-certbot --nginx -d freestate.party -d www.freestate.party --non-interactive --agree-tos --email admin@freestate.party --redirect
 
 echo "==> Done! Site is live at https://freestate.party"
