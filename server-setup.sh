@@ -53,9 +53,10 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_http_version 1.1;
+        proxy_intercept_errors on;
     }
 
-    # Marketing 404 (only for nginx-generated 404s, not app 404s)
+    # Marketing 404 (catches both nginx and proxied 404s)
     error_page 404 /404.html;
     location = /404.html { internal; }
 }
