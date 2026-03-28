@@ -129,7 +129,7 @@ def parse_sections(text):
     return meta, sections
 
 
-API_BASE = 'https://app.freestate.party'
+API_BASE = 'https://freestate.party'
 EASTERN = ZoneInfo('America/New_York')
 
 
