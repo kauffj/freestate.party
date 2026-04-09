@@ -377,10 +377,40 @@ def build_page(base, page_title, page_description, og_title, page_content,
         cls = 'nav-active' if active_nav == nav else 'text-dark-200'
         html = html.replace(f'{{{{nav_{nav}_class}}}}', cls)
 
-    # Footer content
+    # Social icons
+    social_icons = []
     if footer:
-        html = html.replace('{{footer_name}}', footer.get('name', 'Free State Party'))
-        html = html.replace('{{footer_location}}', footer.get('location', 'New Hampshire'))
+        x_url = footer.get('x_url', '')
+        youtube_url = footer.get('youtube_url', '')
+        if x_url and x_url.startswith(('https://', 'http://')):
+            social_icons.append(
+                f'<a href="{escape(x_url)}" target="_blank" rel="noopener noreferrer"'
+                f' aria-label="Free State Party on X"'
+                f' class="text-dark-300 hover:text-gold-500 transition-colors">'
+                f'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+                f'<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>'
+                f'</svg></a>'
+            )
+        if youtube_url and youtube_url.startswith(('https://', 'http://')):
+            social_icons.append(
+                f'<a href="{escape(youtube_url)}" target="_blank" rel="noopener noreferrer"'
+                f' aria-label="Free State Party on YouTube"'
+                f' class="text-dark-300 hover:text-gold-500 transition-colors">'
+                f'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+                f'<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>'
+                f'</svg></a>'
+            )
+    if social_icons:
+        icons_html = ' '.join(social_icons)
+        html = html.replace('{{social_icons_desktop}}',
+            f'<div class="flex items-center gap-3 ml-2 pl-4 border-l border-dark-700">{icons_html}</div>')
+        html = html.replace('{{social_icons_mobile}}',
+            f'<div class="flex items-center gap-4 px-4 pt-4 mt-2 border-t border-dark-700">{icons_html}</div>')
+        html = html.replace('{{social_icons_footer}}', icons_html)
+    else:
+        html = html.replace('{{social_icons_desktop}}', '')
+        html = html.replace('{{social_icons_mobile}}', '')
+        html = html.replace('{{social_icons_footer}}', '')
 
     return html
 

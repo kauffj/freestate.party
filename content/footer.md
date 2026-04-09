@@ -1,5 +1,5 @@
 # Footer
 
 name: Free State Party
-location: New Hampshire
-tagline: A private club for free staters.
+x_url: https://x.com/freestatepty
+youtube_url: https://www.youtube.com/@freestateparty
