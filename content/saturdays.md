@@ -1,7 +1,7 @@
 title: Free State Saturday — Free State Party
 description: The biggest liberty party of the year! Join us for the next Free State Saturday.
 og_title: Free State Saturday
-og_image: /img/saturdays-poster.jpg
+og_image: /img/may-free-state-saturday.png
 
 
 ## Free State Saturday
