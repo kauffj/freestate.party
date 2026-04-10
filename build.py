@@ -221,6 +221,7 @@ def normalize_event(event):
         'starts_at_raw': starts_at,
         'ends_at_raw': ends_at,
         'poster_url': escape(full_poster_url) if full_poster_url else '',
+        'poster_url_raw': full_poster_url,
         'location_raw': location,
         'rsvp_url': escape(rsvp_url),
         'rsvp_url_raw': rsvp_url,
@@ -324,6 +325,13 @@ def parse_words(text):
     return [w.strip() for w in text.strip().split('\n') if w.strip()]
 
 
+def _og_image_tag(og_image):
+    url = og_image or '/img/og-default.png'
+    if url.startswith(('https://', 'http://')):
+        return f'<meta property="og:image" content="{url}">'
+    return f'<meta property="og:image" content="{BASE_URL}{url}">'
+
+
 def _render_minimal_page(template, page_title, page_description, og_title,
                          page_content, page_scripts='', og_url='', og_image='',
                          noindex=False, is_subdir=False, base_path=None):
@@ -336,8 +344,7 @@ def _render_minimal_page(template, page_title, page_description, og_title,
     html = html.replace('{{og_title}}', og_title)
     html = html.replace('{{og_url}}', og_url or BASE_URL)
     html = html.replace('{{canonical_url}}', og_url or BASE_URL)
-    og_image_tag = f'<meta property="og:image" content="{BASE_URL}{og_image or "/img/og-default.png"}">'
-    html = html.replace('{{og_image_tag}}', og_image_tag)
+    html = html.replace('{{og_image_tag}}', _og_image_tag(og_image))
     html = html.replace('{{page_content}}', page_content)
     html = html.replace('{{page_scripts}}', page_scripts)
     if base_path is not None:
@@ -360,8 +367,7 @@ def build_page(base, page_title, page_description, og_title, page_content,
     html = html.replace('{{og_title}}', og_title)
     html = html.replace('{{og_url}}', og_url or BASE_URL)
     html = html.replace('{{canonical_url}}', og_url or BASE_URL)
-    og_image_tag = f'<meta property="og:image" content="{BASE_URL}{og_image or "/img/og-default.png"}">'
-    html = html.replace('{{og_image_tag}}', og_image_tag)
+    html = html.replace('{{og_image_tag}}', _og_image_tag(og_image))
     html = html.replace('{{page_content}}', page_content)
     html = html.replace('{{page_scripts}}', page_scripts)
 
@@ -717,7 +723,7 @@ def build():
         sat_date_str = normed['date_str'] if normed else ''
         sat_rsvp_url = normed['rsvp_url'] if normed else ''
         sat_address = normed['location'] if normed else ''
-        sat_poster_url = normed['poster_url'] if normed else ''
+        sat_poster_url = normed['poster_url_raw'] if normed else ''
         print(f"  Saturday event found: {sat_event.get('title', '?')}")
     else:
         nfs = next_first_saturday()
@@ -792,7 +798,7 @@ def build():
         active_nav=None,
         is_subdir=True,
         og_url=f'{BASE_URL}/saturday/',
-        og_image=saturdays_meta.get('og_image', ''),
+        og_image=sat_poster_url,
         footer=footer_meta
     )
 
