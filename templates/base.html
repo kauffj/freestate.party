@@ -194,23 +194,28 @@
                 Free State <span class="text-gold-500 ml-1">Party</span>
             </a>
 
-            <!-- Desktop Nav -->
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-                <a href="{{base}}/events/" class="{{nav_events_class}} hover:text-gold-500 transition-colors">Events</a>
-                <a href="{{base}}/about/" class="{{nav_about_class}} hover:text-gold-500 transition-colors">About</a>
-                {{social_icons_desktop}}
-                <div id="fsp-user-slot" class="flex items-center"></div>
-            </div>
+            <!-- Right Side: Desktop nav items + always-visible auth slot + mobile menu button -->
+            <div class="flex items-center gap-4 md:gap-8">
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="{{base}}/events/" class="{{nav_events_class}} hover:text-gold-500 transition-colors">Events</a>
+                    <a href="{{base}}/about/" class="{{nav_about_class}} hover:text-gold-500 transition-colors">About</a>
+                    {{social_icons_desktop}}
+                </div>
 
-            <!-- Mobile Menu Button -->
-            <button id="menu-toggle" class="md:hidden p-2 text-dark-200 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+                <!-- Auth widget slot (populated by /embed/auth-widget.js for signed-in users; empty:hidden so anonymous state takes no space) -->
+                <div id="fsp-user-slot" class="flex items-center empty:hidden"></div>
+
+                <!-- Mobile Menu Button -->
+                <button id="menu-toggle" class="md:hidden p-2 text-dark-200 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
                 <svg id="menu-icon-open" class="w-6 h-6" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
                 <svg id="menu-icon-close" class="w-6 h-6 hidden" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
-            </button>
+                </button>
+            </div>
         </nav>
 
         <!-- Mobile Menu -->

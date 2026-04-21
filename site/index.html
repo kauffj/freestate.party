@@ -193,23 +193,28 @@
                 Free State <span class="text-gold-500 ml-1">Party</span>
             </a>
 
-            <!-- Desktop Nav -->
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-                <a href="./events/" class="text-dark-200 hover:text-gold-500 transition-colors">Events</a>
-                <a href="./about/" class="text-dark-200 hover:text-gold-500 transition-colors">About</a>
-                <div class="flex items-center gap-3 ml-2 pl-4 border-l border-dark-700"><a href="https://x.com/freestatepty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on X" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a> <a href="https://www.youtube.com/@freestateparty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on YouTube" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a></div>
-                <div id="fsp-user-slot" class="flex items-center"></div>
-            </div>
+            <!-- Right Side: Desktop nav items + always-visible auth slot + mobile menu button -->
+            <div class="flex items-center gap-4 md:gap-8">
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="./events/" class="text-dark-200 hover:text-gold-500 transition-colors">Events</a>
+                    <a href="./about/" class="text-dark-200 hover:text-gold-500 transition-colors">About</a>
+                    <div class="flex items-center gap-3 ml-2 pl-4 border-l border-dark-700"><a href="https://x.com/freestatepty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on X" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a> <a href="https://www.youtube.com/@freestateparty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on YouTube" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a></div>
+                </div>
 
-            <!-- Mobile Menu Button -->
-            <button id="menu-toggle" class="md:hidden p-2 text-dark-200 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+                <!-- Auth widget slot (populated by /embed/auth-widget.js for signed-in users; empty:hidden so anonymous state takes no space) -->
+                <div id="fsp-user-slot" class="flex items-center empty:hidden"></div>
+
+                <!-- Mobile Menu Button -->
+                <button id="menu-toggle" class="md:hidden p-2 text-dark-200 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
                 <svg id="menu-icon-open" class="w-6 h-6" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
                 <svg id="menu-icon-close" class="w-6 h-6 hidden" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
-            </button>
+                </button>
+            </div>
         </nav>
 
         <!-- Mobile Menu -->
