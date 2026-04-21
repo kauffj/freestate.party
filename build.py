@@ -466,6 +466,7 @@ def build():
     about_meta, about_sections = parse_sections(about_text)
 
     api_events, api_raw = fetch_api_events()
+    api_events.sort(key=lambda e: e.get('startsAt', ''))
     open_events_html = render_api_event_cards(api_events)
 
     footer_text = read_file(os.path.join(CONTENT_DIR, 'footer.md'))
@@ -580,78 +581,21 @@ def build():
         footer=footer_meta
     )
 
-    # --- Page 3: Events (tabbed: open / closed) ---
+    # --- Page 3: Events ---
     events_h1 = 'Events'
     events_content = f'''
-    <section class="px-6 pt-32 pb-20 md:pt-40 md:pb-28">
-        <div class="max-w-3xl mx-auto">
+    <section class="px-6 pt-24 pb-20 md:pt-28 md:pb-28">
+        <div class="max-w-5xl mx-auto">
             <div class="divider mb-6"></div>
-            <h1 class="font-display text-3xl md:text-4xl font-bold text-dark-50 mb-8">{events_h1}</h1>
+            <h1 class="font-display text-3xl md:text-4xl font-bold text-dark-50 mb-10">{events_h1}</h1>
 
-            <!-- Tabs -->
-            <div class="flex gap-2 mb-10" role="tablist">
-                <button id="tab-open" class="events-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-colors bg-gold-500 text-dark-900" data-tab="open" role="tab" aria-selected="true" aria-controls="events-open">
-                    Open
-                </button>
-                <button id="tab-closed" class="events-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-colors bg-dark-800 text-dark-300 hover:text-dark-100" data-tab="closed" role="tab" aria-selected="false" aria-controls="events-closed">
-                    Members Only
-                </button>
-            </div>
-
-            <!-- Open Events -->
-            <div id="events-open" class="events-panel grid grid-cols-1 sm:grid-cols-2 gap-6" role="tabpanel" aria-labelledby="tab-open">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {open_events_html}
-            </div>
-
-            <!-- Closed Events -->
-            <div id="events-closed" class="events-panel hidden" role="tabpanel" aria-labelledby="tab-closed">
-                <div class="border border-dark-700 rounded-lg p-8 md:p-12 text-center max-w-lg mx-auto">
-                    <p class="font-display text-xl font-bold text-dark-50 mb-2">Members only.</p>
-                    <p class="text-dark-300 mb-6">Private dinners, strategy sessions, and more. Come to an open event first.</p>
-                    <a href="{{{{base}}}}/events/#tab-open" onclick="document.getElementById('tab-open').click();return false;" class="inline-block bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold px-6 py-2.5 rounded-lg transition-colors text-sm">View Open Events</a>
-                </div>
             </div>
         </div>
     </section>'''
 
-    events_scripts = '''<script>
-        const tabs = Array.from(document.querySelectorAll('.events-tab'));
-
-        function activateTab(tab) {
-            const target = tab.dataset.tab;
-
-            // Toggle panels
-            document.querySelectorAll('.events-panel').forEach(p => p.classList.add('hidden'));
-            document.getElementById('events-' + target).classList.remove('hidden');
-
-            // Toggle tab styles and ARIA
-            tabs.forEach(t => {
-                t.className = 'events-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-colors bg-dark-800 text-dark-300 hover:text-dark-100';
-                t.setAttribute('aria-selected', 'false');
-                t.setAttribute('tabindex', '-1');
-            });
-            tab.className = 'events-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-colors bg-gold-500 text-dark-900';
-            tab.setAttribute('aria-selected', 'true');
-            tab.setAttribute('tabindex', '0');
-            tab.focus();
-        }
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => activateTab(tab));
-            tab.addEventListener('keydown', (e) => {
-                const idx = tabs.indexOf(tab);
-                let target = null;
-                if (e.key === 'ArrowRight') target = tabs[(idx + 1) % tabs.length];
-                else if (e.key === 'ArrowLeft') target = tabs[(idx - 1 + tabs.length) % tabs.length];
-                else if (e.key === 'Home') target = tabs[0];
-                else if (e.key === 'End') target = tabs[tabs.length - 1];
-                if (target) { e.preventDefault(); activateTab(target); }
-            });
-        });
-
-        // Set initial tabindex
-        tabs.forEach((t, i) => t.setAttribute('tabindex', i === 0 ? '0' : '-1'));
-    </script>'''
+    events_scripts = ''
 
     # Event structured data (schema.org) — reuse normalized events
     event_schema_items = []
@@ -889,6 +833,7 @@ def build():
         </a>
         <p class="text-lg text-dark-200">This page doesn't exist. Maybe it never did.</p>
     </div>'''
+    # nginx serves this file for arbitrary URL depths, so assets must be absolute
     notfound_html = _render_minimal_page(
         minimal_base,
         page_title=notfound_meta['title'],
@@ -896,7 +841,7 @@ def build():
         og_title=notfound_meta.get('og_title', notfound_meta['title']),
         page_content=notfound_content,
         noindex=True,
-        is_subdir=False
+        base_path=''
     )
 
     # --- Write all pages ---

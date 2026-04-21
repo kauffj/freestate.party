@@ -221,23 +221,12 @@
     <!-- ========== PAGE CONTENT ========== -->
     <main id="main" class="flex-grow">
     
-    <section class="px-6 pt-32 pb-20 md:pt-40 md:pb-28">
-        <div class="max-w-3xl mx-auto">
+    <section class="px-6 pt-24 pb-20 md:pt-28 md:pb-28">
+        <div class="max-w-5xl mx-auto">
             <div class="divider mb-6"></div>
-            <h1 class="font-display text-3xl md:text-4xl font-bold text-dark-50 mb-8">Events</h1>
+            <h1 class="font-display text-3xl md:text-4xl font-bold text-dark-50 mb-10">Events</h1>
 
-            <!-- Tabs -->
-            <div class="flex gap-2 mb-10" role="tablist">
-                <button id="tab-open" class="events-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-colors bg-gold-500 text-dark-900" data-tab="open" role="tab" aria-selected="true" aria-controls="events-open">
-                    Open
-                </button>
-                <button id="tab-closed" class="events-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-colors bg-dark-800 text-dark-300 hover:text-dark-100" data-tab="closed" role="tab" aria-selected="false" aria-controls="events-closed">
-                    Members Only
-                </button>
-            </div>
-
-            <!-- Open Events -->
-            <div id="events-open" class="events-panel grid grid-cols-1 sm:grid-cols-2 gap-6" role="tabpanel" aria-labelledby="tab-open">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <a href="https://freestate.party/rsvp/nationalism" target="_blank" rel="noopener noreferrer" class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors no-underline text-inherit cursor-pointer block focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:outline-none">
                     <img src="https://freestate.party/api/uploads/posters/9af65657-bae5-4b1a-aec5-cde5c67b989a.webp" alt="A Deliberation on Nationalism" loading="lazy" class="w-full aspect-[3/4] object-cover rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('object-contain','bg-dark-800','p-8');">
                     <div class="px-4 py-3">
@@ -247,15 +236,24 @@
                     </div>
                     <span class="block px-4 pb-3 text-gold-500 text-xs font-semibold tracking-wide uppercase">RSVP &rarr;</span>
                 </a>
-            </div>
-
-            <!-- Closed Events -->
-            <div id="events-closed" class="events-panel hidden" role="tabpanel" aria-labelledby="tab-closed">
-                <div class="border border-dark-700 rounded-lg p-8 md:p-12 text-center max-w-lg mx-auto">
-                    <p class="font-display text-xl font-bold text-dark-50 mb-2">Members only.</p>
-                    <p class="text-dark-300 mb-6">Private dinners, strategy sessions, and more. Come to an open event first.</p>
-                    <a href="../events/#tab-open" onclick="document.getElementById('tab-open').click();return false;" class="inline-block bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold px-6 py-2.5 rounded-lg transition-colors text-sm">View Open Events</a>
-                </div>
+                <a href="https://freestate.party/rsvp/saturday" target="_blank" rel="noopener noreferrer" class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors no-underline text-inherit cursor-pointer block focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:outline-none">
+                    <img src="https://freestate.party/api/uploads/posters/aa08382c-70bb-4872-a019-704177d06d2d.webp" alt="Free State Saturday" loading="lazy" class="w-full aspect-[3/4] object-cover rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('object-contain','bg-dark-800','p-8');">
+                    <div class="px-4 py-3">
+                        <h3 class="font-display text-base font-bold text-dark-50 mb-1">Free State Saturday</h3>
+                        <p class="text-gold-500 text-sm font-medium">Saturday, May 2, 2026</p>
+                        <p class="text-dark-300 text-sm mt-1 line-clamp-2">Join us May 2nd for a picnic in the park at Stark Park in Manchester! Families and children encouraged. 5pm til dusk.</p>
+                    </div>
+                    <span class="block px-4 pb-3 text-gold-500 text-xs font-semibold tracking-wide uppercase">RSVP &rarr;</span>
+                </a>
+                <a href="https://freestate.party/rsvp/cultural-drift" target="_blank" rel="noopener noreferrer" class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors no-underline text-inherit cursor-pointer block focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:outline-none">
+                    <img src="https://freestate.party/api/uploads/posters/49c61227-79c9-41a4-8921-25d11ff4e345.webp" alt="Cultural Drift with Robin Hanson" loading="lazy" class="w-full aspect-[3/4] object-cover rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('object-contain','bg-dark-800','p-8');">
+                    <div class="px-4 py-3">
+                        <h3 class="font-display text-base font-bold text-dark-50 mb-1">Cultural Drift with Robin Hanson</h3>
+                        <p class="text-gold-500 text-sm font-medium">Friday, May 15, 2026</p>
+                        <p class="text-dark-300 text-sm mt-1 line-clamp-2">Travis Corcoran joins Robin Hanson to discuss the topic of Cultural Drift. Audience discussion and social hour to follow. </p>
+                    </div>
+                    <span class="block px-4 pb-3 text-gold-500 text-xs font-semibold tracking-wide uppercase">RSVP &rarr;</span>
+                </a>
             </div>
         </div>
     </section>
@@ -329,44 +327,7 @@
     </script>
 
     <!-- Page-specific scripts -->
-    <script>
-        const tabs = Array.from(document.querySelectorAll('.events-tab'));
-
-        function activateTab(tab) {
-            const target = tab.dataset.tab;
-
-            // Toggle panels
-            document.querySelectorAll('.events-panel').forEach(p => p.classList.add('hidden'));
-            document.getElementById('events-' + target).classList.remove('hidden');
-
-            // Toggle tab styles and ARIA
-            tabs.forEach(t => {
-                t.className = 'events-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-colors bg-dark-800 text-dark-300 hover:text-dark-100';
-                t.setAttribute('aria-selected', 'false');
-                t.setAttribute('tabindex', '-1');
-            });
-            tab.className = 'events-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-colors bg-gold-500 text-dark-900';
-            tab.setAttribute('aria-selected', 'true');
-            tab.setAttribute('tabindex', '0');
-            tab.focus();
-        }
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => activateTab(tab));
-            tab.addEventListener('keydown', (e) => {
-                const idx = tabs.indexOf(tab);
-                let target = null;
-                if (e.key === 'ArrowRight') target = tabs[(idx + 1) % tabs.length];
-                else if (e.key === 'ArrowLeft') target = tabs[(idx - 1 + tabs.length) % tabs.length];
-                else if (e.key === 'Home') target = tabs[0];
-                else if (e.key === 'End') target = tabs[tabs.length - 1];
-                if (target) { e.preventDefault(); activateTab(target); }
-            });
-        });
-
-        // Set initial tabindex
-        tabs.forEach((t, i) => t.setAttribute('tabindex', i === 0 ? '0' : '-1'));
-    </script>
+    
     <script type="application/ld+json">
     [
     {
@@ -396,6 +357,62 @@
         },
         "image": "https://freestate.party/api/uploads/posters/9af65657-bae5-4b1a-aec5-cde5c67b989a.webp",
         "url": "https://freestate.party/rsvp/nationalism"
+    },
+    {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "Free State Saturday",
+        "description": "Join us May 2nd for a picnic in the park at Stark Park in Manchester! Families and children encouraged. 5pm til dusk.",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "organizer": {
+            "@type": "Organization",
+            "name": "Free State Party",
+            "url": "https://freestate.party"
+        },
+        "startDate": "2026-05-02T21:00:00.000Z",
+        "endDate": "2026-05-03T00:00:00.000Z",
+        "location": {
+            "@type": "Place",
+            "name": "Stark Park, 550 River Rd, Manchester, NH 03104",
+            "address": {
+                "@type": "PostalAddress",
+                "addressRegion": "NH",
+                "addressCountry": "US",
+                "streetAddress": "Stark Park",
+                "addressLocality": "550 River Rd, Manchester,",
+                "postalCode": "03104"
+            }
+        },
+        "image": "https://freestate.party/api/uploads/posters/aa08382c-70bb-4872-a019-704177d06d2d.webp",
+        "url": "https://freestate.party/rsvp/saturday"
+    },
+    {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "Cultural Drift with Robin Hanson",
+        "description": "Travis Corcoran joins Robin Hanson to discuss the topic of Cultural Drift. Audience discussion and social hour to follow. ",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "organizer": {
+            "@type": "Organization",
+            "name": "Free State Party",
+            "url": "https://freestate.party"
+        },
+        "startDate": "2026-05-15T22:00:00.000Z",
+        "endDate": "2026-05-16T01:00:00.000Z",
+        "location": {
+            "@type": "Place",
+            "name": "Americans For Prosperity New Hampshire, 8025 S Willow St, Manchester, NH 03103",
+            "address": {
+                "@type": "PostalAddress",
+                "addressRegion": "NH",
+                "addressCountry": "US",
+                "streetAddress": "Americans For Prosperity New Hampshire",
+                "addressLocality": "8025 S Willow St, Manchester,",
+                "postalCode": "03103"
+            }
+        },
+        "image": "https://freestate.party/api/uploads/posters/49c61227-79c9-41a4-8921-25d11ff4e345.webp",
+        "url": "https://freestate.party/rsvp/cultural-drift"
     }
 ]
     </script>
