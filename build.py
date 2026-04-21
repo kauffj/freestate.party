@@ -291,7 +291,7 @@ def render_api_event_cards(events):
         rsvp_url = normed['rsvp_url']
 
         if poster_url:
-            img_html = f'<img src="{poster_url}" alt="{title}" loading="lazy" class="w-full aspect-[3/4] object-cover rounded-t-lg" onerror="this.onerror=null;this.src=\'{{{{base}}}}/img/logo.svg\';this.classList.add(\'object-contain\',\'bg-dark-800\',\'p-8\');">'
+            img_html = f'<img src="{poster_url}" alt="{title}" loading="lazy" class="w-full aspect-[3/4] object-contain bg-dark-900 rounded-t-lg" onerror="this.onerror=null;this.src=\'{{{{base}}}}/img/logo.svg\';this.classList.add(\'bg-dark-800\',\'p-8\');">'
         else:
             img_html = '<img src="{{base}}/img/logo.svg" alt="Free State Party" loading="lazy" class="w-full aspect-[3/4] object-contain rounded-t-lg bg-dark-800 p-8">'
 

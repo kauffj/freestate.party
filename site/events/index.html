@@ -175,6 +175,9 @@
 
     <!-- Analytics -->
     <script defer data-domain="freestate.party" src="https://plausible.freestate.party/js/script.js"></script>
+
+    <!-- fsp-app auth widget (populates #fsp-user-slot for signed-in users) -->
+    <script src="https://freestate.party/embed/auth-widget.js" async></script>
 </head>
 <body class="bg-dark-900 text-dark-100 antialiased min-h-screen flex flex-col">
 
@@ -195,6 +198,7 @@
                 <a href="../events/" class="nav-active hover:text-gold-500 transition-colors">Events</a>
                 <a href="../about/" class="text-dark-200 hover:text-gold-500 transition-colors">About</a>
                 <div class="flex items-center gap-3 ml-2 pl-4 border-l border-dark-700"><a href="https://x.com/freestatepty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on X" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a> <a href="https://www.youtube.com/@freestateparty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on YouTube" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a></div>
+                <div id="fsp-user-slot" class="flex items-center"></div>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -228,7 +232,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <a href="https://freestate.party/rsvp/nationalism" target="_blank" rel="noopener noreferrer" class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors no-underline text-inherit cursor-pointer block focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:outline-none">
-                    <img src="https://freestate.party/api/uploads/posters/9af65657-bae5-4b1a-aec5-cde5c67b989a.webp" alt="A Deliberation on Nationalism" loading="lazy" class="w-full aspect-[3/4] object-cover rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('object-contain','bg-dark-800','p-8');">
+                    <img src="https://freestate.party/api/uploads/posters/9af65657-bae5-4b1a-aec5-cde5c67b989a.webp" alt="A Deliberation on Nationalism" loading="lazy" class="w-full aspect-[3/4] object-contain bg-dark-900 rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('bg-dark-800','p-8');">
                     <div class="px-4 py-3">
                         <h3 class="font-display text-base font-bold text-dark-50 mb-1">A Deliberation on Nationalism</h3>
                         <p class="text-gold-500 text-sm font-medium">Thursday, April 30, 2026</p>
@@ -237,7 +241,7 @@
                     <span class="block px-4 pb-3 text-gold-500 text-xs font-semibold tracking-wide uppercase">RSVP &rarr;</span>
                 </a>
                 <a href="https://freestate.party/rsvp/saturday" target="_blank" rel="noopener noreferrer" class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors no-underline text-inherit cursor-pointer block focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:outline-none">
-                    <img src="https://freestate.party/api/uploads/posters/aa08382c-70bb-4872-a019-704177d06d2d.webp" alt="Free State Saturday" loading="lazy" class="w-full aspect-[3/4] object-cover rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('object-contain','bg-dark-800','p-8');">
+                    <img src="https://freestate.party/api/uploads/posters/aa08382c-70bb-4872-a019-704177d06d2d.webp" alt="Free State Saturday" loading="lazy" class="w-full aspect-[3/4] object-contain bg-dark-900 rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('bg-dark-800','p-8');">
                     <div class="px-4 py-3">
                         <h3 class="font-display text-base font-bold text-dark-50 mb-1">Free State Saturday</h3>
                         <p class="text-gold-500 text-sm font-medium">Saturday, May 2, 2026</p>
@@ -246,7 +250,7 @@
                     <span class="block px-4 pb-3 text-gold-500 text-xs font-semibold tracking-wide uppercase">RSVP &rarr;</span>
                 </a>
                 <a href="https://freestate.party/rsvp/cultural-drift" target="_blank" rel="noopener noreferrer" class="bg-dark-900 border border-dark-600 rounded-lg overflow-hidden hover:border-gold-700/50 transition-colors no-underline text-inherit cursor-pointer block focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:outline-none">
-                    <img src="https://freestate.party/api/uploads/posters/49c61227-79c9-41a4-8921-25d11ff4e345.webp" alt="Cultural Drift with Robin Hanson" loading="lazy" class="w-full aspect-[3/4] object-cover rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('object-contain','bg-dark-800','p-8');">
+                    <img src="https://freestate.party/api/uploads/posters/49c61227-79c9-41a4-8921-25d11ff4e345.webp" alt="Cultural Drift with Robin Hanson" loading="lazy" class="w-full aspect-[3/4] object-contain bg-dark-900 rounded-t-lg" onerror="this.onerror=null;this.src='../img/logo.svg';this.classList.add('bg-dark-800','p-8');">
                     <div class="px-4 py-3">
                         <h3 class="font-display text-base font-bold text-dark-50 mb-1">Cultural Drift with Robin Hanson</h3>
                         <p class="text-gold-500 text-sm font-medium">Friday, May 15, 2026</p>
