@@ -176,6 +176,9 @@
 
     <!-- Analytics -->
     <script defer data-domain="freestate.party" src="https://plausible.freestate.party/js/script.js"></script>
+
+    <!-- fsp-app auth widget (populates #fsp-user-slot for signed-in users) -->
+    <script src="https://freestate.party/embed/auth-widget.js" async></script>
 </head>
 <body class="bg-dark-900 text-dark-100 antialiased min-h-screen flex flex-col">
 
@@ -196,6 +199,7 @@
                 <a href="{{base}}/events/" class="{{nav_events_class}} hover:text-gold-500 transition-colors">Events</a>
                 <a href="{{base}}/about/" class="{{nav_about_class}} hover:text-gold-500 transition-colors">About</a>
                 {{social_icons_desktop}}
+                <div id="fsp-user-slot" class="flex items-center"></div>
             </div>
 
             <!-- Mobile Menu Button -->
