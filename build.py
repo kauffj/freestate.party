@@ -662,12 +662,16 @@ def build():
     saturdays_title, saturdays_body = md_to_html(saturdays_text)
 
     sat_event = find_saturday_event(api_events)
+    sat_description_html = ''
     if sat_event:
         normed = normalize_event(sat_event)
         sat_date_str = normed['date_str'] if normed else ''
         sat_rsvp_url = normed['rsvp_url'] if normed else ''
         sat_address = normed['location'] if normed else ''
         sat_poster_url = normed['poster_url_raw'] if normed else ''
+        if normed and normed['description']:
+            paragraphs = [p.strip() for p in re.split(r'\n\s*\n', normed['description']) if p.strip()]
+            sat_description_html = '\n                '.join(f'<p>{p}</p>' for p in paragraphs)
         print(f"  Saturday event found: {sat_event.get('title', '?')}")
     else:
         nfs = next_first_saturday()
@@ -728,7 +732,7 @@ def build():
             <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-dark-50 mb-4">{saturdays_title if saturdays_title else "Free State Saturday"}</h1>
             <p class="text-gold-500 text-xl font-medium mb-6">{sat_date_str}</p>
             <div class="space-y-4 text-lg text-dark-200 leading-relaxed max-w-2xl mx-auto">
-                {saturdays_body}
+                {sat_description_html if sat_description_html else saturdays_body}
             </div>
         </div>
     </section>{buttons_html}{poster_html}{bottom_buttons_html}'''
