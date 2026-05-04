@@ -48,7 +48,7 @@ All content in `content/*.md`. Non-technical collaborators edit markdown, run `p
 
 **Content and metadata are co-located.** Every page's title, description, og:image, and any other page-level config must live in the same `content/*.md` file as the page content — never in a separate file. Non-technical editors should only need to touch one file per page, without splitting unless there is a clear reason such as a content block being used across multiple pages.
 
-Files: hero.md (home), about.md (about), events.md (events), saturdays.md (saturdays), rsvp.md (RSVP), footer.md, words.md
+Files: hero.md (home), about.md (about), events.md (events), rsvp.md (RSVP), footer.md, words.md
 
 ## What NOT to Do
 

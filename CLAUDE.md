@@ -4,7 +4,7 @@
 Multi-page site for the Free State Party — a private club for liberty-minded free staters in NH. Dennis Pratt runs concierge/vetting (anonymous on site).
 
 ## Stack
-- Multi-page output: `site/index.html`, `about/index.html`, `events/index.html`, `saturdays/index.html`
+- Multi-page output: `site/index.html`, `about/index.html`, `events/index.html`
 - Clean URLs via directory-based structure (e.g. `/about` serves `about/index.html`)
 - Content in `content/*.md` (the CMS — edit content here)
 - Shared template: `templates/base.html` with `{{placeholders}}`
@@ -22,7 +22,6 @@ Multi-page site for the Free State Party — a private club for liberty-minded f
 - **/** — Home: hero with cycling word animation + video
 - **/about** — About: pitch (identity/belonging) + what this is (clarity)
 - **/events** — Events: tabbed open/closed
-- **/saturdays** — Free State Saturdays: unlisted landing page with rotating poster image (not in nav)
 
 ## Directory Structure
 ```
@@ -34,14 +33,12 @@ content/          <- Markdown content files (the CMS)
   come-meet-us.md <- Join page copy
   footer.md       <- Footer content
   words.md        <- Cycling word list (one per line)
-  saturdays.md    <- Free State Saturdays page content
 templates/
   base.html       <- Shared HTML shell (nav, footer, head, scripts)
 site/             <- Built output (deploy this dir)
   index.html      <- Home
   about/index.html  <- About
   events/index.html <- Events
-  saturdays/index.html <- Free State Saturdays (unlisted)
   video/          <- Homepage video
   img/            <- Event/poster images
 build.py          <- Build script
@@ -58,7 +55,6 @@ See `DECISIONS.md` for the full list. Key points:
 - **Palette**: dark-900 #0a0a0a + gold-500 #d4a017
 - **Fonts**: Playfair Display (headlines) + Inter (body)
 - **Voice**: Community "we", confident, unapologetic, LPNH energy
-- **JOIN button**: Links to /saturdays (join form disabled for now). Cannot join online, must meet in person.
 - **Reactionary Futurism**: Past values + forward momentum. Not nostalgic.
 
 ## Gotchas

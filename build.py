@@ -421,36 +421,6 @@ def build_page(base, page_title, page_description, og_title, page_content,
     return html
 
 
-def find_saturday_event(events):
-    """Find the first event whose title contains 'saturday' (case-insensitive)."""
-    for event in events:
-        title = event.get('title', '')
-        if isinstance(title, str) and 'saturday' in title.lower():
-            return event
-    return None
-
-
-def next_first_saturday():
-    """Compute the next first Saturday of the month from today."""
-    from calendar import monthrange
-    today = datetime.now(EASTERN).date()
-    # Check this month's first Saturday
-    year, month = today.year, today.month
-    # First day of month, find first Saturday (weekday 5)
-    first_day_weekday = datetime(year, month, 1).weekday()
-    first_sat = 1 + (5 - first_day_weekday) % 7
-    if first_sat >= today.day:
-        return datetime(year, month, first_sat).date()
-    # Move to next month
-    if month == 12:
-        year, month = year + 1, 1
-    else:
-        month += 1
-    first_day_weekday = datetime(year, month, 1).weekday()
-    first_sat = 1 + (5 - first_day_weekday) % 7
-    return datetime(year, month, first_sat).date()
-
-
 def build():
     print("Building Free State Party site...")
 
@@ -656,100 +626,6 @@ def build():
     )
 
 
-    # --- Page 5: Saturdays (unlisted landing page, dynamic from API) ---
-    saturdays_text = read_file(os.path.join(CONTENT_DIR, 'saturdays.md'))
-    saturdays_meta = extract_meta(saturdays_text)
-    saturdays_title, saturdays_body = md_to_html(saturdays_text)
-
-    sat_event = find_saturday_event(api_events)
-    sat_description_html = ''
-    if sat_event:
-        normed = normalize_event(sat_event)
-        sat_date_str = normed['date_str'] if normed else ''
-        sat_rsvp_url = normed['rsvp_url'] if normed else ''
-        sat_address = normed['location'] if normed else ''
-        sat_poster_url = normed['poster_url_raw'] if normed else ''
-        if normed and normed['description']:
-            paragraphs = [p.strip() for p in re.split(r'\n\s*\n', normed['description']) if p.strip()]
-            sat_description_html = '\n                '.join(f'<p>{p}</p>' for p in paragraphs)
-        print(f"  Saturday event found: {sat_event.get('title', '?')}")
-    else:
-        nfs = next_first_saturday()
-        sat_date_str = nfs.strftime('%A, %B %-d, %Y')
-        sat_rsvp_url = ''
-        sat_address = ''
-        sat_poster_url = ''
-        print(f"  No Saturday event in API, using fallback date: {sat_date_str}")
-
-    sat_maps_url = 'https://www.google.com/maps/search/' + sat_address.replace(' ', '+') if sat_address else ''
-
-    # Build button sections conditionally
-    buttons = []
-    if sat_rsvp_url:
-        buttons.append(f'<a href="{sat_rsvp_url}" class="inline-flex items-center justify-center bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">RSVP</a>')
-    if sat_maps_url:
-        buttons.append(f'<a href="{sat_maps_url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-dark-700 hover:bg-dark-600 text-dark-100 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Map</a>')
-
-    buttons_html = ''
-    if buttons:
-        buttons_inner = '\n            '.join(buttons)
-        buttons_html = f'''
-    <section class="px-6 pb-8 md:pb-10 text-center">
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            {buttons_inner}
-        </div>
-    </section>'''
-
-    # Poster section
-    poster_html = ''
-    if sat_poster_url:
-        poster_link_open = f'<a href="{sat_maps_url}" target="_blank" rel="noopener noreferrer" class="block select-none">' if sat_maps_url else '<div>'
-        poster_link_close = '</a>' if sat_maps_url else '</div>'
-        poster_html = f'''
-    <section class="px-6 pb-8 md:pb-10">
-        <div class="max-w-4xl mx-auto">
-            {poster_link_open}
-                <img src="{sat_poster_url}" alt="Free State Saturday — this month's gathering"
-                     class="w-full rounded-lg shadow-2xl hover:opacity-90 transition-opacity max-h-[80vh] object-contain">
-            {poster_link_close}
-        </div>
-    </section>'''
-
-    # Bottom buttons (duplicate of top, only if we have buttons)
-    bottom_buttons_html = ''
-    if buttons and (sat_poster_url or saturdays_body):
-        bottom_buttons_html = f'''
-    <section class="px-6 pb-20 md:pb-28 text-center">
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            {buttons_inner}
-        </div>
-    </section>'''
-
-    saturdays_content = f'''
-    <section class="px-6 pt-32 pb-12 md:pt-40 md:pb-16">
-        <div class="max-w-4xl mx-auto text-center">
-            <div class="divider mb-6 mx-auto"></div>
-            <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-dark-50 mb-4">{saturdays_title if saturdays_title else "Free State Saturday"}</h1>
-            <p class="text-gold-500 text-xl font-medium mb-6">{sat_date_str}</p>
-            <div class="space-y-4 text-lg text-dark-200 leading-relaxed max-w-2xl mx-auto">
-                {sat_description_html if sat_description_html else saturdays_body}
-            </div>
-        </div>
-    </section>{buttons_html}{poster_html}{bottom_buttons_html}'''
-
-    saturdays_html = build_page(
-        base,
-        page_title=saturdays_meta['title'],
-        page_description=saturdays_meta['description'],
-        og_title=saturdays_meta.get('og_title', saturdays_meta['title']),
-        page_content=saturdays_content,
-        active_nav=None,
-        is_subdir=True,
-        og_url=f'{BASE_URL}/saturday/',
-        og_image=sat_poster_url,
-        footer=footer_meta
-    )
-
     # --- Page 6: Business (unlisted, noindex — for Stripe) ---
     business_text = read_file(os.path.join(CONTENT_DIR, 'business.md'))
     business_meta = extract_meta(business_text)
@@ -855,24 +731,9 @@ def build():
         'about/index.html': about_html,
         'events/index.html': events_html_page,
         'business/index.html': business_html,
-        'saturday/index.html': saturdays_html,
         'founding/index.html': founding_html,
         '404.html': notfound_html,
     }
-
-    # --- /saturday/rsvp/ redirect (only if we have an RSVP URL) ---
-    if sat_rsvp_url:
-        rsvp_redirect_html = f'''<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url={sat_rsvp_url}">
-<title>Redirecting...</title>
-</head>
-<body>
-</body>
-</html>'''
-        pages['saturday/rsvp/index.html'] = rsvp_redirect_html
 
     for filepath, html in pages.items():
         full_path = os.path.join(SITE_DIR, filepath)
