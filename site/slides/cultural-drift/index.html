@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cultural Drift — Robin Hanson's Framework</title>
+<style>
+  /* FSP brand tokens — see brands/fsp.json + freestate.party site.
+     Source token names retained so per-element styles still resolve;
+     each source color is remapped to a sanctioned gold variant or
+     neutral. Brand spec forbids any third color and any third font. */
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg-deep: #0a0a0a;
+    --bg-dark: #141414;
+    --bg-card: #1a1a1a;
+    --bg-card-hover: #222222;
+    --gold: #d4a017;
+    --gold-bright: #d4a017;            /* collapsed: one gold only */
+    --gold-glow: rgba(212,160,23,0.15);
+    --cream: #f8f8f8;
+    --white: #f8f8f8;
+    --muted: #808080;
+    /* Source had decorative hue accents (red/green/blue). Collapsed to
+       a binary: --red = drift-outcome emphasis (gold), --green/--blue =
+       cream (no hue). Cards differentiate by content + numbering, not
+       color stripes. */
+    --red: #d4a017;
+    --red-soft: rgba(212,160,23,0.15);
+    --green: #b0b0b0;
+    --green-soft: rgba(176,176,176,0.10);
+    --blue: #f8f8f8;
+    --blue-soft: rgba(248,248,248,0.06);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'Inter', -apple-system, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    background: var(--bg-deep);
+    color: var(--cream);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── SLIDE CONTAINER ── */
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+  @media (max-width: 900px) { .slide { padding: 2rem 1.5rem; } }
+
+  /* (Source had radial gradient halos here — stripped per FSP brand: no
+     soft colored ambient washes. Flat dark surfaces only.) */
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.015;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .section-label {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+  .slide-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+  }
+  .slide-subtitle {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 700px;
+    line-height: 1.5;
+  }
+  .gold-rule {
+    width: 80px;
+    height: 2px;
+    background: var(--gold);
+    margin: 1.25rem 0;
+    border: none;
+  }
+  .source {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: auto;
+    padding-top: 2rem;
+  }
+  .source a { color: var(--gold); text-decoration: none; }
+  .source a:hover { text-decoration: underline; }
+
+  /* ── ANIMATIONS ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+  .reveal-delay-5 { transition-delay: 0.5s; }
+  .reveal-delay-6 { transition-delay: 0.6s; }
+  .reveal-delay-7 { transition-delay: 0.7s; }
+  .reveal-delay-8 { transition-delay: 0.8s; }
+
+  /* ── PROGRESS BAR ── */
+  #progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: var(--gold);
+    z-index: 1000;
+    transition: width 0.15s ease;
+  }
+
+  /* ── NAV DOTS ── */
+  #nav-dots {
+    position: fixed;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+  }
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(212,160,23,0.2);
+    border: 1px solid rgba(212,160,23,0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .nav-dot:hover, .nav-dot.active {
+    background: var(--gold);
+    transform: scale(1.4);
+  }
+  .nav-dot .tooltip {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-card);
+    color: var(--cream);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    border: 1px solid rgba(212,160,23,0.15);
+  }
+  .nav-dot:hover .tooltip { opacity: 1; }
+
+  /* ── SLIDE 1: TITLE ── */
+  #title-slide {
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    background: var(--bg-deep);
+  }
+  #title-slide .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  #title-slide .hero-title span {
+    color: var(--white);
+  }
+  #title-slide .hero-sub {
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    color: var(--gold);
+    font-weight: 400;
+    margin-bottom: 2rem;
+  }
+  #title-slide .hero-meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  #title-slide .hero-meta a { color: var(--gold); text-decoration: none; }
+  #title-slide .hero-meta a:hover { text-decoration: underline; }
+  .hero-rule {
+    width: 120px;
+    height: 2px;
+    background: var(--gold);
+    margin: 1.5rem 0;
+    border: none;
+  }
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    animation: pulse-down 2s ease infinite;
+  }
+  .scroll-hint svg { width: 20px; height: 20px; stroke: var(--gold); }
+  @keyframes pulse-down {
+    0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+    50% { opacity: 0.8; transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ── QUOTE BLOCK ── */
+  .quote-block {
+    position: relative;
+    padding: 2rem 2.5rem;
+    background: var(--bg-card); border-radius: 8px;
+    margin: 1.5rem 0;
+    max-width: 900px;
+  }
+  .quote-block::before {
+    content: '\201C';
+    font-family: var(--font-display);
+    font-size: 4rem;
+    color: var(--gold);
+    opacity: 0.3;
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    line-height: 1;
+  }
+  .quote-text {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-style: italic;
+    color: var(--white);
+    line-height: 1.5;
+  }
+  .quote-attr {
+    font-size: 0.85rem;
+    color: var(--gold);
+    margin-top: 0.75rem;
+  }
+
+  /* ── CARDS ── */
+  .card-grid {
+    display: grid;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .card-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .card-grid-2x4 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 900px) {
+    .card-grid-3, .card-grid-4 { grid-template-columns: 1fr; }
+    .card-grid-2, .card-grid-2x4 { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.35s ease;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    border-color: rgba(212,160,23,0.15);
+  }
+  /* .card-accent — colored top-stripe element from source. Stripped per
+     FSP brand (no colored chrome on box edges). Element kept in markup
+     but rendered to nothing. */
+  .card-accent { display: none; }
+  .card .card-num {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    opacity: 0.15;
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+  }
+  .card-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+  .card h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+  .card p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .card .card-tag {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── COMPARISON COLUMNS ── */
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+    max-width: 1000px;
+  }
+  @media (max-width: 900px) { .compare-row { grid-template-columns: 1fr; } }
+  .compare-col {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 2rem;
+    transition: transform 0.3s ease;
+  }
+  .compare-col:hover { transform: translateY(-3px); }
+  .compare-col h3 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  .compare-col p {
+    font-size: 0.92rem;
+    color: var(--cream);
+    line-height: 1.6;
+  }
+  .compare-col .bold-insight {
+    font-weight: 600;
+    color: var(--white);
+    margin-top: 0.75rem;
+    display: block;
+  }
+  .compare-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--gold);
+    opacity: 0.5;
+  }
+
+  /* ── STAT CALLOUT ── */
+  .stat-callout {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 2.5rem;
+    text-align: center;
+    border: 1px solid rgba(212,160,23,0.2);
+    transition: all 0.3s ease;
+  }
+  .stat-callout:hover {
+    border-color: var(--gold);
+  }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: var(--green);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 1rem;
+    color: var(--cream);
+    margin-top: 0.5rem;
+  }
+  .stat-source {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 1rem;
+  }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow-row {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    margin: 1.5rem 0;
+    max-width: 1100px;
+  }
+  @media (max-width: 900px) { .flow-row { flex-direction: column; gap: 0.5rem; } }
+  .flow-step {
+    flex: 1;
+    background: var(--bg-card);
+    padding: 1.5rem 1.25rem;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .flow-step:first-child { border-radius: 8px 0 0 8px; }
+  .flow-step:last-child { border-radius: 8px; }
+  .flow-step:hover { background: var(--bg-card-hover); }
+  .flow-step h4 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .flow-step p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .flow-arrow {
+    display: flex;
+    align-items: center;
+    color: var(--gold);
+    font-size: 1.2rem;
+    padding: 0 0.3rem;
+    opacity: 0.5;
+  }
+  @media (max-width: 900px) { .flow-arrow { transform: rotate(90deg); justify-content: center; padding: 0.3rem 0; } }
+
+  /* ── TABLE ── */
+  .drift-table {
+    width: 100%;
+    max-width: 1000px;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+    margin: 1rem 0;
+  }
+  .drift-table thead th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.5rem 1rem;
+    text-align: left;
+  }
+  .drift-table tbody tr {
+    background: var(--bg-card);
+    transition: all 0.3s ease;
+    border-radius: 6px;
+  }
+  .drift-table tbody tr:hover {
+    background: var(--bg-card-hover);
+    transform: translateX(4px);
+  }
+  .drift-table td {
+    padding: 1rem 1.25rem;
+    font-size: 0.88rem;
+    vertical-align: top;
+  }
+  .drift-table td:first-child {
+    border-radius: 6px 0 0 6px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--white);
+    width: 140px;
+  }
+  .drift-table td:last-child { border-radius: 0 6px 6px 0; }
+  .drift-table .col-was { color: var(--green); }
+  .drift-table .col-became { color: var(--red); }
+
+  /* ── CHECKLIST ── */
+  .checklist {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem 2rem;
+    margin: 1rem 0;
+    max-width: 900px;
+  }
+  @media (max-width: 900px) { .checklist { grid-template-columns: 1fr; } }
+  .checklist li {
+    position: relative;
+    padding-left: 1.75rem;
+    font-size: 0.92rem;
+    color: var(--cream);
+    line-height: 1.5;
+  }
+  .checklist li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  /* ── INSIGHT BOX ── */
+  .insight-box {
+    background: var(--bg-card);
+    border: 1px solid rgba(212,160,23,0.20);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    max-width: 900px;
+  }
+  .insight-box .insight-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--gold-bright);
+    margin-bottom: 0.5rem;
+  }
+  .insight-box p {
+    font-size: 0.9rem;
+    color: var(--cream);
+    line-height: 1.6;
+  }
+
+  /* ── INTERACTIVE PARAMETERS ── */
+  .param-card {
+    cursor: pointer;
+    position: relative;
+  }
+  .param-card .param-detail {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  .param-card.expanded .param-detail {
+    max-height: 200px;
+    opacity: 1;
+  }
+  .param-card .expand-hint {
+    font-size: 0.72rem;
+    color: var(--gold);
+    opacity: 0.6;
+    margin-top: 0.5rem;
+    transition: opacity 0.2s;
+  }
+  .param-card.expanded .expand-hint { display: none; }
+
+  /* ── THREE COLUMNS ── */
+  .three-cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin: 1.5rem 0;
+  }
+  @media (max-width: 900px) { .three-cols { grid-template-columns: 1fr; } }
+  .level-card {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 1.75rem;
+    transition: all 0.35s ease;
+    position: relative;
+  }
+  .level-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .level-card .level-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    margin-bottom: 0.5rem;
+  }
+  .level-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--white);
+    margin-bottom: 0.75rem;
+  }
+  .level-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .level-card li {
+    font-size: 0.85rem;
+    color: var(--muted);
+    padding: 0.3rem 0;
+    padding-left: 1rem;
+    position: relative;
+    line-height: 1.5;
+  }
+  .level-card li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    opacity: 0.5;
+  }
+
+  /* ── SOURCES SLIDE ── */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 1.5rem 0;
+  }
+  @media (max-width: 900px) { .sources-grid { grid-template-columns: 1fr; } }
+  .sources-section h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--white);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(212,160,23,0.15);
+  }
+  .sources-section ul {
+    list-style: none;
+    padding: 0;
+  }
+  .sources-section li {
+    font-size: 0.82rem;
+    color: var(--muted);
+    padding: 0.35rem 0;
+    line-height: 1.45;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .sources-section li:last-child { border-bottom: none; }
+  .sources-section a {
+    color: var(--gold);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .sources-section a:hover { color: var(--gold-bright); text-decoration: underline; }
+
+  /* ── KEYBOARD HINT ── */
+  .kbd-hint {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    color: var(--muted);
+    opacity: 0.4;
+    letter-spacing: 0.1em;
+    z-index: 100;
+    transition: opacity 0.5s;
+  }
+  body.scrolled .kbd-hint { opacity: 0; }
+
+  /* ── COUNTER ANIMATION ── */
+  .count-up {
+    transition: opacity 0.5s;
+  }
+
+  /* ── INTERACTIVE TABS ── */
+  .tab-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    border: 1px solid rgba(212,160,23,0.2);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .tab-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .tab-btn.active {
+    background: rgba(212,160,23,0.1);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── PLAYBOOK GRID ── */
+  .playbook-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+  @media (max-width: 900px) { .playbook-grid { grid-template-columns: 1fr; } }
+  .playbook-item {
+    display: flex;
+    gap: 1rem;
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.03);
+    align-items: flex-start;
+  }
+  .playbook-item:hover {
+    background: var(--bg-card-hover);
+    border-color: rgba(212,160,23,0.12);
+    transform: translateX(4px);
+  }
+  .playbook-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(212,160,23,0.08);
+  }
+  .playbook-item h4 {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    color: var(--white);
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .playbook-item p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── FICTION CALLOUT ── */
+  .fiction-callout {
+    background: var(--bg-card);
+    border: 1px solid rgba(212,160,23,0.20);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .fiction-callout h4 {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .fiction-callout p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── BACK BUTTON — site chrome, kept separate from deck content ── */
+  #back-to-site {
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 200;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--cream);
+    background: rgba(10,10,10,0.7);
+    border: 1px solid rgba(212,160,23,0.25);
+    border-radius: 999px;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+  #back-to-site svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    transition: transform 0.2s ease;
+  }
+  #back-to-site:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: rgba(10,10,10,0.85);
+  }
+  #back-to-site:hover svg { transform: translateX(-2px); }
+  @media (max-width: 600px) {
+    #back-to-site span { display: none; }
+    #back-to-site { padding: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Back to freestate.party — site chrome, separate from deck content. -->
+<a id="back-to-site" href="/" aria-label="Back to Free State Party">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <path d="M19 12H5M12 19l-7-7 7-7"/>
+  </svg>
+  <span>Free State Party</span>
+</a>
+
+<!-- Progress Bar -->
+<div id="progress" style="width:0%"></div>
+
+<!-- Nav Dots -->
+<nav id="nav-dots"></nav>
+
+<!-- Keyboard Hint -->
+<div class="kbd-hint">SCROLL or ↑↓ to navigate</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 1: TITLE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="title-slide" data-title="Title">
+  <div class="reveal">
+    <hr class="hero-rule">
+  </div>
+  <h1 class="hero-title reveal reveal-delay-1"><span>Cultural Drift</span></h1>
+  <p class="hero-sub reveal reveal-delay-2">How Civilizations Lose What Made Them Great</p>
+  <hr class="hero-rule reveal reveal-delay-3">
+  <div class="hero-meta reveal reveal-delay-4">
+    Robin Hanson's Framework for Understanding Value Change<br>
+    Based on 50+ posts at <a href="https://www.overcomingbias.com/p/my-culture-posts" target="_blank">OvercomingBias.com</a> (2023–2026)<br>
+    <em>"Beware Cultural Drift"</em> — <a href="https://quillette.com/2024/04/11/beware-cultural-drift/" target="_blank">Quillette, April 2024</a>
+  </div>
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 2: THE PROBLEM -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-problem" data-title="The Problem">
+  <div class="section-label reveal">THE PROBLEM</div>
+  <h2 class="slide-title reveal reveal-delay-1">Something Is Wrong</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div class="quote-block reveal reveal-delay-3">
+    <p class="quote-text">I feel deeply betrayed and adrift by the culture I implicitly and deeply loved.</p>
+    <p class="quote-attr">— Robin Hanson, <a href="https://www.overcomingbias.com/p/betrayed-by-culture" target="_blank">"Betrayed By Culture"</a> (Oct 2024)</p>
+  </div>
+
+  <p class="slide-subtitle reveal reveal-delay-4" style="margin: 1.25rem 0;">The question isn't whether your culture will change.<br>It's whether you'll notice before it's unrecognizable.</p>
+
+  <div class="card-grid card-grid-3 reveal reveal-delay-5">
+    <div class="card">
+      <div class="card-accent" style="background: var(--blue);"></div>
+      <h3 style="color: var(--blue);">Variety Collapsed</h3>
+      <p>Global monoculture replaces local diversity. Thousands of genuinely different value systems compressed into a shrinking number of recognizable alternatives.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent" style="background: var(--green);"></div>
+      <h3 style="color: var(--green);">Selection Weakened</h3>
+      <p>Wealth removes competitive pressure on values. Cultures can sustain fertility-killing, cooperation-undermining values for generations before paying the price.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent" style="background: var(--gold);"></div>
+      <h3 style="color: var(--gold);">Change Accelerated</h3>
+      <p>Modern status competition redirects the energy that once went into wars into culture wars. Each generation pushes further, faster, with no recall mechanism.</p>
+    </div>
+  </div>
+
+  <p class="source reveal reveal-delay-6">Source: Hanson, <a href="https://www.overcomingbias.com/p/what-if-culture-is-unstable" target="_blank">"What If Culture Is Unstable?"</a> (Oct 2023)</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 3: THE MECHANISM -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-mechanism" data-title="The Mechanism">
+  <div class="section-label reveal">THE MECHANISM</div>
+  <h2 class="slide-title reveal reveal-delay-1">Four Parameters of Cultural Drift</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+  <p class="slide-subtitle reveal reveal-delay-2">Click any parameter to expand.</p>
+
+  <div class="card-grid" style="grid-template-columns: 1fr; gap: 0.75rem; max-width: 900px; margin-top: 1.25rem;">
+    <div class="card param-card reveal reveal-delay-3" onclick="this.classList.toggle('expanded')" style="">
+      <span class="card-num" style="color: var(--blue);">01</span>
+      <h3 style="color: var(--blue);">Cultural Variety</h3>
+      <p>How many genuinely different cultures exist? Globalization and communication technology have collapsed variety from thousands to a shrinking handful.</p>
+      <div class="param-detail">
+        <p style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05);">Hanson draws on Boyd & Richerson's Dual Inheritance Theory (1985): cultural traits spread through conformist bias — people disproportionately copy the most common behavior. In a connected world, "most common" means the global dominant culture, not your local one. The math is identical to genetic drift in population biology.</p>
+      </div>
+      <div class="expand-hint">↓ click to expand</div>
+    </div>
+    <div class="card param-card reveal reveal-delay-4" onclick="this.classList.toggle('expanded')" style="">
+      <span class="card-num" style="color: var(--green);">02</span>
+      <h3 style="color: var(--green);">Selection Pressure</h3>
+      <p>Do cultures that adopt maladaptive values face consequences? In a world of material abundance, the answer is: not for a very long time.</p>
+      <div class="param-detail">
+        <p style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05);">Pre-modern cultures faced constant selection: adopt bad values, your group shrinks, gets conquered, or starves. Modern wealth creates slack — you can sustain fertility below replacement for decades before the demographic cliff arrives. By then, the values are entrenched.</p>
+      </div>
+      <div class="expand-hint">↓ click to expand</div>
+    </div>
+    <div class="card param-card reveal reveal-delay-5" onclick="this.classList.toggle('expanded')" style="">
+      <span class="card-num" style="color: var(--gold-bright);">03</span>
+      <h3 style="color: var(--gold-bright);">Rate of Change</h3>
+      <p>How fast do values shift? Modern status competition has turned cultural innovation into the primary arena of prestige competition.</p>
+      <div class="param-detail">
+        <p style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05);">Young people differentiate from elders to establish identity. The competitive energy that once went into literal wars now fuels culture wars. Cultural entrepreneurs — activists, influencers, academics — gain status by selling change. They're rewarded for being novel, not for being right.</p>
+      </div>
+      <div class="expand-hint">↓ click to expand</div>
+    </div>
+    <div class="card param-card reveal reveal-delay-6" onclick="this.classList.toggle('expanded')" style="">
+      <span class="card-num" style="color: var(--red);">04</span>
+      <h3 style="color: var(--red);">Internal Drift</h3>
+      <p>Are value changes driven by wisdom or fashion? There's no recall mechanism for bad cultural innovations.</p>
+      <div class="param-detail">
+        <p style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05);">Bad laws can be repealed. Bad cultural shifts cannot. Once a value change is internalized by a generation, there is no undo button. Cultural entrepreneurs are our most celebrated heroes — but persuasive people are not necessarily wise people. The market for cultural innovation rewards novelty, not durability.</p>
+      </div>
+      <div class="expand-hint">↓ click to expand</div>
+    </div>
+  </div>
+
+  <p class="source reveal reveal-delay-7">Source: <a href="https://www.overcomingbias.com/p/how-fix-cultural-drift" target="_blank">"How Fix Cultural Drift?"</a> (May 2024) · <a href="https://jimruttshow.blubrry.net/robin-hanson-3/" target="_blank">Jim Rutt Show EP 235</a> (Apr 2024)</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 4: THE BIOLOGY -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-biology" data-title="The Biology">
+  <div class="section-label reveal">THE BIOLOGY</div>
+  <h2 class="slide-title reveal reveal-delay-1">This Isn't a Metaphor. It's the Same Math.</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div class="compare-row reveal reveal-delay-3">
+    <div class="compare-col" style="border-color: var(--gold);">
+      <h3 style="color: var(--blue);">Genetic Drift</h3>
+      <p>In small populations, random chance determines which genes survive — not fitness. Island species diverge from mainland populations not because they're better adapted, but because randomness compounds.</p>
+      <span class="bold-insight">The smaller the population, the stronger the effect.</span>
+    </div>
+    <div class="compare-col" style="border-color: var(--gold);">
+      <h3 style="color: var(--gold);">Cultural Drift</h3>
+      <p>In communities, random transmission errors determine which values survive — not wisdom. Small communities develop distinct cultures. But they can lose them through the same random process.</p>
+      <span class="bold-insight">No conspiracy required. Entropy is sufficient.</span>
+    </div>
+  </div>
+
+  <div class="insight-box reveal reveal-delay-4">
+    <div class="insight-label">KEY INSIGHT</div>
+    <p>Boyd & Richerson (1985) identified five forces of cultural change: random variation, cultural drift, natural selection, guided variation, and biased transmission. The same population genetics math that models gene frequencies models value frequencies. This is <strong>Dual Inheritance Theory</strong> — and it means cultural drift is a quantifiable, predictable force, not a vague complaint.</p>
+  </div>
+
+  <p class="source reveal reveal-delay-5">Source: Boyd & Richerson, <em>Culture and the Evolutionary Process</em> (1985) · Henrich, <em>The Secret of Our Success</em> (2015) · <a href="https://en.wikipedia.org/wiki/Dual_inheritance_theory" target="_blank">DIT overview</a></p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 5: THE ENGINE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-engine" data-title="The Engine">
+  <div class="section-label reveal">THE ENGINE</div>
+  <h2 class="slide-title reveal reveal-delay-1">Status Copying & The Young</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div style="display: grid; grid-template-columns: 1fr 380px; gap: 2rem; max-width: 1000px; align-items: start;">
+    <div>
+      <div class="card reveal reveal-delay-3" style="margin-bottom: 0.5rem; border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
+          <span style="background: var(--gold); color: var(--bg-deep); width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">1</span>
+          <h3 style="margin: 0;">Conformist Bias</h3>
+        </div>
+        <p>People disproportionately copy the most common behavior. In a connected world, that means copying the global dominant culture, not your local one.</p>
+      </div>
+      <div class="card reveal reveal-delay-4" style="margin-bottom: 0.5rem; border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
+          <span style="background: var(--gold); color: var(--bg-deep); width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">2</span>
+          <h3 style="margin: 0;">Prestige Bias</h3>
+        </div>
+        <p>We copy high-status individuals regardless of whether their values are adaptive. Activists gain status by being novel — not wise.</p>
+      </div>
+      <div class="card reveal reveal-delay-5" style="margin-bottom: 0.5rem; border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
+          <span style="background: var(--gold); color: var(--bg-deep); width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">3</span>
+          <h3 style="margin: 0;">Youth as Engine</h3>
+        </div>
+        <p>Young people differentiate from elders to establish identity. The energy that once went into literal wars now fuels culture wars.</p>
+      </div>
+      <div class="card reveal reveal-delay-6" style=" border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
+          <span style="background: var(--gold); color: var(--bg-deep); width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">4</span>
+          <h3 style="margin: 0;">No Recall Mechanism</h3>
+        </div>
+        <p>Bad laws can be repealed. Bad cultural innovations cannot. There's no undo button for a value shift internalized by a generation.</p>
+      </div>
+    </div>
+
+    <div class="quote-block reveal reveal-delay-5" style="margin: 0; position: sticky; top: 5rem;">
+      <p class="quote-text" style="font-size: 1.15rem;">Cultural entrepreneurs are our most celebrated heroes. We pay them with the highest coin: social status.</p>
+      <p class="quote-attr">— Robin Hanson</p>
+      <hr style="border: none; height: 1px; background: rgba(212,160,23,0.2); margin: 1rem 0;">
+      <p style="font-size: 0.88rem; color: var(--cream);">The problem: persuasive people are not necessarily wise people. And the market for cultural innovation rewards novelty, not durability.</p>
+    </div>
+  </div>
+
+  <p class="source reveal reveal-delay-7">Source: <a href="https://www.overcomingbias.com/p/youth-drive-cultural-drift" target="_blank">"Youth Drive Cultural Drift"</a> (May 2024)</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 6: THE RATCHET -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-ratchet" data-title="The Ratchet">
+  <div class="section-label reveal">THE RATCHET</div>
+  <h2 class="slide-title reveal reveal-delay-1">Preference Falsification</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+  <p class="slide-subtitle reveal reveal-delay-2">Why drift appears gradual — then reverses suddenly.</p>
+
+  <div class="flow-row reveal reveal-delay-3" style="margin-top: 1.5rem;">
+    <div class="flow-step" style="border-color: var(--gold);">
+      <h4 style="color: var(--red);">Falsify</h4>
+      <p>Members publicly express preferences that differ from private beliefs. The social cost of dissent exceeds the cost of silence.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color: var(--gold);">
+      <h4 style="color: var(--red);">Spiral</h4>
+      <p>Each act of falsification reinforces perceived consensus. The vocal minority appears to be the majority. Dissenters see no allies.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color: var(--gold);">
+      <h4 style="color: var(--red);">Corrupt</h4>
+      <p>Leaders navigate with a broken compass. They can't access accurate data about what the community actually wants.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color: var(--gold);">
+      <h4 style="color: var(--green);">Cascade</h4>
+      <p>When one person breaks ranks, it triggers a chain reaction. The actual distribution was hidden. Revolutions surprise even participants.</p>
+    </div>
+  </div>
+
+  <div class="insight-box reveal reveal-delay-5">
+    <div class="insight-label">IMPLICATION</div>
+    <p><strong>Timur Kuran</strong> (<em>Private Truths, Public Lies</em>, 1995): A community experiencing "drift" may actually have a large silent population that disagrees. The question is whether conditions exist for a <strong>preference cascade</strong> to reveal the hidden distribution. If your members are falsifying preferences about the community's direction, leadership is navigating with a broken compass.</p>
+  </div>
+
+  <p class="source reveal reveal-delay-6">Source: Kuran, <em>Private Truths, Public Lies</em> (1995) · Noelle-Neumann, <em>The Spiral of Silence</em> (1984)</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 7: O'SULLIVAN'S LAW -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-law" data-title="O'Sullivan's Law">
+  <div class="section-label reveal">THE LAW</div>
+  <h2 class="slide-title reveal reveal-delay-1">Every Institution Drifts</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div class="quote-block reveal reveal-delay-3" style="max-width: 1000px;">
+    <p class="quote-text" style="font-size: 1.15rem;">"All organizations that are not actually [committed to their founding values] will over time drift from them."</p>
+    <p class="quote-attr">— Adapted from O'Sullivan's First Law (<em>National Review</em>, 1989)</p>
+  </div>
+
+  <table class="drift-table reveal reveal-delay-4" style="margin-top: 1rem;">
+    <thead><tr><th></th><th>FOUNDED AS</th><th>DRIFTED TO</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>The ACLU</td>
+        <td class="col-was">Defended constitutional rights regardless of speaker's politics. Represented neo-Nazis' right to march.</td>
+        <td class="col-became">Spent $800K on partisan campaign ads. Former director Ira Glasser publicly condemned the shift.</td>
+      </tr>
+      <tr>
+        <td>Sierra Club</td>
+        <td class="col-was">Environmental conservation focused on wilderness and natural resources.</td>
+        <td class="col-became">Executive director condemned the founder. Mission expanded to social justice. Members left.</td>
+      </tr>
+      <tr>
+        <td>Universities</td>
+        <td class="col-was">Liberal arts education. Pursuit of truth through open inquiry.</td>
+        <td class="col-became">Administrative bloat, ideological conformity, mission drift to "comprehensive university" branding.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="insight-box reveal reveal-delay-5">
+    <div class="insight-label">THE MECHANISM</div>
+    <p><strong>Tyler Cowen's analysis:</strong> concentrated activists with intense preferences outmaneuver diffuse majorities. Those who care most about institutional direction steer it. This isn't conspiracy — it's Mancur Olson's <em>Logic of Collective Action</em> (1965). Small groups with concentrated interests systematically defeat large groups with diffuse ones.</p>
+  </div>
+
+  <p class="source reveal reveal-delay-6">Source: <a href="https://marginalrevolution.com/marginalrevolution/2021/06/how-and-why-is-conquests-second-law-true.html" target="_blank">Cowen, "How and why is Conquest's Second Law true?"</a> (Marginal Revolution, 2021)</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 8: EXIT, VOICE, LOYALTY -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-evl" data-title="Exit, Voice, Loyalty">
+  <div class="section-label reveal">THE DILEMMA</div>
+  <h2 class="slide-title reveal reveal-delay-1">Exit, Voice, and Loyalty</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+  <p class="slide-subtitle reveal reveal-delay-2">Albert Hirschman (1970): When quality declines, members can leave, speak up, or stay quiet.</p>
+
+  <div class="card-grid card-grid-3 reveal reveal-delay-3" style="margin-top: 1.5rem;">
+    <div class="card" style="">
+      <h3 style="color: var(--red);">Exit</h3>
+      <p>Leave the community. Low friction. Removes your influence entirely. The most capable members — those who could fix things — leave first.</p>
+      <p style="margin-top: 0.75rem; font-size: 0.82rem;"><strong>Brain drain accelerates decline.</strong> The people most sensitive to quality decline are exactly the people with the most resources to leave — and the most ability to improve things if they stayed.</p>
+      <span class="card-tag" style="background: var(--red-soft); color: var(--red);">Easy exit = death spiral</span>
+    </div>
+    <div class="card" style="">
+      <h3 style="color: var(--gold);">Voice</h3>
+      <p>Speak up. Organize. Push for internal reform. Requires that leadership actually listens and that there's a credible threat of exit behind it.</p>
+      <p style="margin-top: 0.75rem; font-size: 0.82rem;"><strong>Structured disagreement > purges.</strong> Deliberation mechanisms that channel conflict productively are the cultural immune system. Private clubs with in-person vetting prevent online mob dynamics.</p>
+      <span class="card-tag" style="background: var(--gold-glow); color: var(--gold);">Effective voice = immune system</span>
+    </div>
+    <div class="card" style="">
+      <h3 style="color: var(--blue);">Loyalty</h3>
+      <p>Emotional attachment delays exit and strengthens voice. But loyalty without voice becomes passive acceptance of decline.</p>
+      <p style="margin-top: 0.75rem; font-size: 0.82rem;"><strong>Neglect is the silent killer.</strong> A fourth response — staying but disengaging. Neither leaving nor fighting. The most corrosive to communities because neglectful members consume resources while contributing nothing.</p>
+      <span class="card-tag" style="background: var(--red-soft); color: var(--red);">Loyalty without voice = slow death</span>
+    </div>
+  </div>
+
+  <p class="source reveal reveal-delay-5">Source: Hirschman, <em>Exit, Voice, and Loyalty</em> (Harvard UP, 1970)</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 9: WHAT WORKS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-works" data-title="What Works">
+  <div class="section-label reveal" style="color: var(--green);">WHAT WORKS</div>
+  <h2 class="slide-title reveal reveal-delay-1">Costly Signals & Sacred Canopies</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem; max-width: 1000px; align-items: start; margin-top: 1rem;">
+    <div class="stat-callout reveal reveal-delay-3">
+      <div class="stat-num">2–4×</div>
+      <div class="stat-label">more likely to survive<br>(every year of existence)</div>
+      <div class="stat-source">Religious communes vs. secular<br>Sosis & Bressler (2003), N=83</div>
+    </div>
+
+    <div>
+      <div class="card reveal reveal-delay-4" style="margin-bottom: 0.5rem;">
+        <h3>Costly Signaling</h3>
+        <p>Religious communes imposed <strong>2× as many costly requirements</strong> — dietary restrictions, dress codes, rituals. More cost = longer survival. But <em>only</em> with a sacred framework. Secular communes that imposed costly requirements did NOT see the same benefit.</p>
+      </div>
+      <div class="card reveal reveal-delay-5" style="margin-bottom: 0.5rem;">
+        <h3>Can't Fake It</h3>
+        <p>Religious rituals are harder to free-ride on than ideological commitments. You can pretend to believe an idea. It's harder to fake a life. <strong>Geographic relocation</strong> is itself a costly signal — only people willing to uproot their lives self-select in.</p>
+      </div>
+      <div class="card reveal reveal-delay-6" style="margin-bottom: 0.5rem;">
+        <h3>Boundary Maintenance</h3>
+        <p>Language, dress, technology norms create visible borders. The <strong>Amish retain 85–90% of youth</strong> after Rumspringa. Stricter sects: 97%. Hutterites split at ~150 members — Dunbar-range groups resist drift better.</p>
+      </div>
+      <div class="card reveal reveal-delay-7">
+        <h3>Colony Fission, Not Sprawl</h3>
+        <p>When a community grows past ~150, split into sub-communities that share geography but maintain distinct identities. Institutionalists, provocateurs, and purists can coexist as a <strong>federated network</strong>, not a monolith.</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="source reveal reveal-delay-8">Source: Sosis & Bressler, "Cooperation and Commune Longevity" (<em>Cross-Cultural Research</em>, 2003)</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 10: WHAT FAILS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-fails" data-title="What Fails">
+  <div class="section-label reveal" style="color: var(--red);">WHAT FAILS</div>
+  <h2 class="slide-title reveal reveal-delay-1">When Drift Wins</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div class="quote-block reveal reveal-delay-3" style="margin-bottom: 1.5rem;">
+    <p class="quote-text" style="font-size: 1.05rem;">"The crisis derives from the inescapable interaction of its communal philosophy with the outside world — most pointedly, with the materialism of its neighbors."</p>
+    <p class="quote-attr">— <em>Dissent Magazine</em>, on the kibbutzim</p>
+  </div>
+
+  <div class="tab-row reveal reveal-delay-4">
+    <button class="tab-btn active" onclick="switchTab(event, 'tab-kibbutz')">Kibbutzim</button>
+    <button class="tab-btn" onclick="switchTab(event, 'tab-patterns')">Failure Patterns</button>
+    <button class="tab-btn" onclick="switchTab(event, 'tab-lesson')">The Lesson</button>
+  </div>
+
+  <div id="tab-kibbutz" class="tab-content active reveal reveal-delay-5">
+    <div class="card-grid card-grid-4">
+      <div class="card" style="">
+        <h3 style="color: var(--green); font-size: 0.85rem;">FOUNDING</h3>
+        <p>Self-selected true believers. Only the most committed immigrated. Culture coherent because cost of entry was high.</p>
+      </div>
+      <div class="card" style="">
+        <h3 style="color: var(--gold); font-size: 0.85rem;">GROWTH</h3>
+        <p>Children didn't choose the life. Generational transmission failed. The second generation inherited infrastructure, not fire.</p>
+      </div>
+      <div class="card" style="">
+        <h3 style="color: var(--red); font-size: 0.85rem;">EROSION</h3>
+        <p>Communal cafeterias fell out of use. Private ownership crept in. Differential pay appeared. Easy exit to Israeli cities.</p>
+      </div>
+      <div class="card" style="">
+        <h3 style="color: var(--red); font-size: 0.85rem;">COLLAPSE</h3>
+        <p>By the 2000s, most kibbutzim formally privatized. The communal model exists only in a handful of holdouts.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-patterns" class="tab-content reveal">
+    <div class="card-grid card-grid-3">
+      <div class="card">
+        <h3>Generational Decay</h3>
+        <p>Founders self-selected for commitment. Their children didn't. Without mechanisms to recreate founding-level commitment each generation, drift is inevitable.</p>
+      </div>
+      <div class="card">
+        <h3>Frictionless Exit</h3>
+        <p>The kibbutzim were minutes from cities. The Amish are hours from anywhere. Exit friction directly predicts cultural persistence.</p>
+      </div>
+      <div class="card">
+        <h3>No Sacred Canopy</h3>
+        <p>Secular kibbutzim lacked the religious framework Sosis showed is critical. Religious kibbutzim showed higher cooperation and survived better.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-lesson" class="tab-content reveal">
+    <div class="insight-box" style="max-width: 800px;">
+      <div class="insight-label">THE HARD TRUTH</div>
+      <p>Selection effects on founders don't transfer automatically. <strong>A pledge to relocate selects for commitment.</strong> But the children of those who relocated didn't sign any pledge. And newcomers drawn by success — mainstream political organizations, media attention, external funding — face lower barriers than pioneers did. Growth is the enemy of purity unless you design for it.</p>
+    </div>
+  </div>
+
+  <p class="source reveal reveal-delay-6">Source: Sosis & Bressler (2003) · <a href="https://dissentmagazine.org/article/kibbutzim-will-they-survive-the-new-israel/" target="_blank">Dissent Magazine</a></p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 11: COUNTER-STRATEGIES -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-counter" data-title="Counter-Strategies">
+  <div class="section-label reveal">COUNTER-STRATEGIES</div>
+  <h2 class="slide-title reveal reveal-delay-1">Hanson's Three Levels of Culture Fixes</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div class="three-cols" style="margin-top: 1rem;">
+    <div class="level-card reveal reveal-delay-3" style="border-color: var(--gold);">
+      <div class="level-badge" style="color: var(--blue);">LEVEL A</div>
+      <h3>Reverse Specific Trends</h3>
+      <p style="font-size: 0.88rem; color: var(--muted); margin-bottom: 0.75rem;">Identify individual cultural shifts deemed maladaptive, then advocate reversing them.</p>
+      <ul>
+        <li>Hanson surveyed 32 trends</li>
+        <li>Most achievable: complex law, over-schooling, tolerance of mental illness</li>
+        <li><strong>Problem:</strong> fights one brushfire while the forest burns</li>
+      </ul>
+    </div>
+    <div class="level-card reveal reveal-delay-4" style="border-color: var(--gold);">
+      <div class="level-badge" style="color: var(--gold);">LEVEL B</div>
+      <h3>Fix the Parameters</h3>
+      <p style="font-size: 0.88rem; color: var(--muted); margin-bottom: 0.75rem;">Target the four underlying parameters directly. Top-ranked fixes:</p>
+      <ul>
+        <li><strong>All Capitalism</strong> — let markets select for adaptive culture</li>
+        <li><strong>Fragment World</strong> — restore diversity via many smaller polities</li>
+        <li><strong>Shame Activism</strong> — reduce status rewards for cultural entrepreneurs</li>
+        <li><strong>Slower Change</strong> — institutionalize resistance to rapid shifts</li>
+      </ul>
+    </div>
+    <div class="level-card reveal reveal-delay-5" style="border-color: var(--gold);">
+      <div class="level-badge" style="color: var(--green);">LEVEL C</div>
+      <h3>Governance Mechanisms</h3>
+      <p style="font-size: 0.88rem; color: var(--muted); margin-bottom: 0.75rem;">Delegate the problem to systems designed to resist drift:</p>
+      <ul>
+        <li><strong>Futarchy</strong> — prediction markets tied to sacred goals</li>
+        <li><strong>Sacred texts</strong> — explicit unchanging value codification</li>
+        <li><strong>Technical standards</strong> — lock in practices through formalization</li>
+        <li><strong>Federated model</strong> — "be especially indulgent of cults that want to break off"</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="source reveal reveal-delay-6">Source: <a href="https://www.overcomingbias.com/p/3-levels-of-culture-fixes" target="_blank">"3 Levels of Culture Fixes"</a> · <a href="https://www.overcomingbias.com/p/can-systems-stop-culture-drift" target="_blank">"Can Systems Stop Culture Drift?"</a> (2024–2025)</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 12: DEEP MULTICULTURALISM -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-deep" data-title="Deep Multiculturalism">
+  <div class="section-label reveal">THE VISION</div>
+  <h2 class="slide-title reveal reveal-delay-1">Libertarianism as Deep Multiculturalism</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div class="quote-block reveal reveal-delay-3" style="max-width: 900px;">
+    <p class="quote-text" style="font-size: 1.1rem;">The single best defense against cultural drift is not a specific ideology — it's enabling many small polities with genuinely different core values to coexist and compete.</p>
+    <p style="font-size: 0.95rem; color: var(--cream); margin-top: 0.75rem;">Not shallow diversity (different food, same values) — <strong>deep diversity</strong>: communities with fundamentally different answers to how life should be lived. Cultures should learn to be <em>"especially indulgent of cults that want to break off from them."</em></p>
+    <p class="quote-attr">— Robin Hanson, <a href="https://www.overcomingbias.com/p/libertarianism-as-deep-multiculturalism" target="_blank">"Libertarianism As Deep Multiculturalism"</a> (March 2024)</p>
+  </div>
+
+  <h3 style="font-family: var(--font-display); color: var(--gold); margin-top: 1.5rem; font-size: 1.1rem;" class="reveal reveal-delay-4">What This Requires</h3>
+  <ul class="checklist reveal reveal-delay-5">
+    <li><strong>Geographic concentration</strong> — values need physical proximity to sustain themselves</li>
+    <li><strong>Selection mechanisms</strong> — high-commitment entry, meaningful costs of membership</li>
+    <li><strong>Low barriers to forming new polities</strong> — exit as a right, not a punishment</li>
+    <li><strong>Deliberation infrastructure</strong> — voice that actually shapes outcomes, not performative input</li>
+    <li><strong>Tolerance for communities you find distasteful</strong> — genuine pluralism means protecting groups you disagree with</li>
+    <li><strong>Economic self-sufficiency</strong> — dependency on outsiders creates leverage for drift</li>
+  </ul>
+
+  <p class="source reveal reveal-delay-6">Source: <a href="https://www.overcomingbias.com/p/libertarianism-as-deep-multiculturalism" target="_blank">"Libertarianism As Deep Multiculturalism"</a> (OvercomingBias, March 5, 2024)</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 13: THE PLAYBOOK -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-playbook" data-title="The Playbook">
+  <div class="section-label reveal">THE PLAYBOOK</div>
+  <h2 class="slide-title reveal reveal-delay-1">Building a Drift-Resistant Community</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div class="playbook-grid" style="max-width: 1050px;">
+    <div class="playbook-item reveal reveal-delay-3">
+      <div>
+        <h4>High Cost of Entry</h4>
+        <p>The pledge mechanism works: only people willing to uproot their lives self-select. Geographic relocation is itself a costly signal. Maintain barriers.</p>
+      </div>
+    </div>
+    <div class="playbook-item reveal reveal-delay-3">
+      <div>
+        <h4>Visible Commitment Markers</h4>
+        <p>Attending events, running for office, building businesses — secular equivalents of religious costly signals. Commitment must be visible to work.</p>
+      </div>
+    </div>
+    <div class="playbook-item reveal reveal-delay-4">
+      <div>
+        <h4>Deliberation > Purges</h4>
+        <p>Structured disagreement channels energy productively. Private clubs with in-person vetting prevent online mob dynamics. Voice beats exit.</p>
+      </div>
+    </div>
+    <div class="playbook-item reveal reveal-delay-4">
+      <div>
+        <h4>Colony Fission, Not Sprawl</h4>
+        <p>Split into factions sharing geography but maintaining distinct identities. Institutionalists, provocateurs, and anarchists coexist as federated communities.</p>
+      </div>
+    </div>
+    <div class="playbook-item reveal reveal-delay-5">
+      <div>
+        <h4>Economic Self-Sufficiency</h4>
+        <p>Dependency on outside institutions creates leverage for drift. Crypto adoption, parallel economies, and local business networks reduce vulnerability.</p>
+      </div>
+    </div>
+    <div class="playbook-item reveal reveal-delay-5">
+      <div>
+        <h4>Sacred Goals, Not Just Ideology</h4>
+        <p>Hanson: "We might proudly suffer when asked to sacrifice for a sacred goal." A movement needs something worth suffering for — not just a platform.</p>
+      </div>
+    </div>
+    <div class="playbook-item reveal reveal-delay-6">
+      <div>
+        <h4>Generational Transmission</h4>
+        <p>Founders self-selected. Their children didn't. Education, apprenticeship, festivals, and coming-of-age rituals must recreate founding-level commitment.</p>
+      </div>
+    </div>
+    <div class="playbook-item reveal reveal-delay-6">
+      <div>
+        <h4>Track the Real Distribution</h4>
+        <p>Monitor actual beliefs, not vocal consensus. If 50% of your members are privately skeptical, you need to know before the cascade hits.</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="source reveal reveal-delay-7">Synthesis of Hanson, Sosis, Hirschman, Kuran, Boyd & Richerson</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 14: SOURCES -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="slide" id="slide-sources" data-title="Sources">
+  <div class="section-label reveal">SOURCES & FURTHER READING</div>
+  <h2 class="slide-title reveal reveal-delay-1">Go Deeper</h2>
+  <hr class="gold-rule reveal reveal-delay-2">
+
+  <div class="sources-grid reveal reveal-delay-3">
+    <div class="sources-section">
+      <h3>Robin Hanson — Primary Sources</h3>
+      <ul>
+        <li><a href="https://quillette.com/2024/04/11/beware-cultural-drift/" target="_blank">"Beware Cultural Drift"</a> — Quillette, Apr 2024</li>
+        <li><a href="https://www.overcomingbias.com/p/what-if-culture-is-unstable" target="_blank">"What If Culture Is Unstable?"</a> — Oct 2023</li>
+        <li><a href="https://www.overcomingbias.com/p/how-fix-cultural-drift" target="_blank">"How Fix Cultural Drift?"</a> — May 2024</li>
+        <li><a href="https://www.overcomingbias.com/p/libertarianism-as-deep-multiculturalism" target="_blank">"Libertarianism As Deep Multiculturalism"</a> — Mar 2024</li>
+        <li><a href="https://www.overcomingbias.com/p/betrayed-by-culture" target="_blank">"Betrayed By Culture"</a> — Oct 2024</li>
+        <li><a href="https://www.overcomingbias.com/p/youth-drive-cultural-drift" target="_blank">"Youth Drive Cultural Drift"</a> — May 2024</li>
+        <li><a href="https://www.overcomingbias.com/p/how-every-empire-falls" target="_blank">"How Every Empire Falls"</a> — Oct 2024</li>
+        <li><a href="https://www.overcomingbias.com/p/culture-drift-predicts-decadence" target="_blank">"Culture Drift Predicts Decadence"</a> — Oct 2024</li>
+        <li><a href="https://www.overcomingbias.com/p/modernism-tests-cultural-drift" target="_blank">"Modernism Tests Cultural Drift"</a> — Sep 2024</li>
+        <li><a href="https://www.overcomingbias.com/p/my-culture-posts" target="_blank">My Culture Posts</a> — Full index (50+ posts)</li>
+        <li><a href="https://jimruttshow.blubrry.net/robin-hanson-3/" target="_blank">Jim Rutt Show EP 235</a> — Podcast, Apr 2024</li>
+        <li><a href="https://www.betonit.ai/p/a-hanson-caplan-dialogue-on-cultural" target="_blank">Hanson-Caplan Dialogue on Cultural Drift</a></li>
+      </ul>
+    </div>
+    <div class="sources-section">
+      <h3>Supporting Literature</h3>
+      <ul>
+        <li>Boyd & Richerson, <em>Culture and the Evolutionary Process</em> (1985)</li>
+        <li>Henrich, <em>The Secret of Our Success</em> (2015)</li>
+        <li>Kuran, <em>Private Truths, Public Lies</em> (1995)</li>
+        <li>Hirschman, <em>Exit, Voice, and Loyalty</em> (1970)</li>
+        <li>Michels, <em>Political Parties</em> (1911)</li>
+        <li>Olson, <em>The Logic of Collective Action</em> (1965)</li>
+        <li>O'Sullivan, "O'Sullivan's First Law" (<em>National Review</em>, 1989)</li>
+        <li>Sosis & Bressler, "Cooperation and Commune Longevity" (2003)</li>
+        <li>Noelle-Neumann, <em>The Spiral of Silence</em> (1984)</li>
+        <li>Gelfand, <em>Rule Makers, Rule Breakers</em> (2018)</li>
+      </ul>
+      <div class="fiction-callout" style="margin-top: 1rem;">
+        <h4>Relevant Fiction</h4>
+        <p>Travis Corcoran, <em>The Powers of the Earth</em> (Prometheus Award, 2018)<br>
+        Travis Corcoran, <em>Causes of Separation</em> (Prometheus Award, 2019)<br>
+        <em>Anarcho-capitalism on the moon — how a free society builds and maintains itself under pressure from Earth's governments.</em></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── PROGRESS BAR ──
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = (scrollTop / docHeight) * 100;
+  document.getElementById('progress').style.width = progress + '%';
+
+  if (scrollTop > 200) document.body.classList.add('scrolled');
+  else document.body.classList.remove('scrolled');
+});
+
+// ── NAV DOTS ──
+const slides = document.querySelectorAll('.slide');
+const navDots = document.getElementById('nav-dots');
+
+slides.forEach((slide, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot';
+  dot.innerHTML = `<span class="tooltip">${slide.dataset.title || 'Slide ' + (i+1)}</span>`;
+  dot.addEventListener('click', () => {
+    slide.scrollIntoView({ behavior: 'smooth' });
+  });
+  navDots.appendChild(dot);
+});
+
+// Update active dot
+const dotObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const idx = Array.from(slides).indexOf(entry.target);
+      document.querySelectorAll('.nav-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === idx);
+      });
+    }
+  });
+}, { threshold: 0.4 });
+
+slides.forEach(slide => dotObserver.observe(slide));
+
+// ── KEYBOARD NAVIGATION ──
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    const current = getCurrentSlideIndex();
+    if (current < slides.length - 1) {
+      slides[current + 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    const current = getCurrentSlideIndex();
+    if (current > 0) {
+      slides[current - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+});
+
+function getCurrentSlideIndex() {
+  let closest = 0;
+  let minDist = Infinity;
+  slides.forEach((slide, i) => {
+    const dist = Math.abs(slide.getBoundingClientRect().top);
+    if (dist < minDist) { minDist = dist; closest = i; }
+  });
+  return closest;
+}
+
+// ── TAB SWITCHING ──
+function switchTab(e, tabId) {
+  const parent = e.target.closest('.slide');
+  parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+// ── COUNT UP ANIMATION ──
+const countObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const target = parseInt(el.dataset.target);
+      let current = 0;
+      const step = () => {
+        current += 0.1;
+        if (current >= target) {
+          el.textContent = target;
+          return;
+        }
+        el.textContent = current.toFixed(0);
+        requestAnimationFrame(step);
+      };
+      step();
+      countObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.count-up').forEach(el => countObserver.observe(el));
+</script>
+
+</body>
+</html>
