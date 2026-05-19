@@ -133,6 +133,24 @@ API_BASE = 'https://freestate.party'
 EASTERN = ZoneInfo('America/New_York')
 
 
+def filter_past_events(events, now=None):
+    """Drop events whose endsAt (or startsAt, if no end) is in the past."""
+    if now is None:
+        now = datetime.now(tz=ZoneInfo('UTC'))
+    kept = []
+    for event in events:
+        cutoff = event.get('endsAt') or event.get('startsAt') or ''
+        if not isinstance(cutoff, str) or not cutoff.strip():
+            continue
+        try:
+            cutoff_dt = datetime.fromisoformat(cutoff.replace('Z', '+00:00'))
+        except ValueError:
+            continue
+        if cutoff_dt >= now:
+            kept.append(event)
+    return kept
+
+
 def fetch_api_events():
     """Fetch events from the API. Returns (events_list, raw_bytes).
     raw_bytes is the unmodified API response, used for change-detection hashing.
@@ -436,6 +454,7 @@ def build():
     about_meta, about_sections = parse_sections(about_text)
 
     api_events, api_raw = fetch_api_events()
+    api_events = filter_past_events(api_events)
     api_events.sort(key=lambda e: e.get('startsAt', ''))
     open_events_html = render_api_event_cards(api_events)
 

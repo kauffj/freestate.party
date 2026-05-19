@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: [events-changed]
+  schedule:
+    - cron: '0 9 * * *'
 
 jobs:
   deploy:
