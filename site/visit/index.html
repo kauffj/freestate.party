@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visit — Free State Party</title>
+    <meta name="description" content="Curious whether New Hampshire is everything they say? Come see for yourself. We'll help you plan a visit and meet the people building the future here.">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="A Free State Vacation">
+    <meta property="og:description" content="Curious whether New Hampshire is everything they say? Come see for yourself. We'll help you plan a visit and meet the people building the future here.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://freestate.party/visit/">
+    <meta property="og:image" content="https://freestate.party/img/visit/is-it-real.jpg">
+    <link rel="canonical" href="https://freestate.party/visit/">
+
+    <!-- Favicon -->
+    <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fefce8',
+                            100: '#fef9c3',
+                            200: '#fef08a',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#d4a017',
+                            600: '#b8860b',
+                            700: '#92700c',
+                            800: '#6b5210',
+                            900: '#422d08',
+                        },
+                        dark: {
+                            50: '#f8f8f8',
+                            100: '#e0e0e0',
+                            200: '#b0b0b0',
+                            300: '#808080',
+                            400: '#505050',
+                            500: '#2a2a2a',
+                            600: '#1f1f1f',
+                            700: '#181818',
+                            800: '#141414',
+                            900: '#0a0a0a',
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+        .gold-gradient {
+            background: linear-gradient(135deg, #d4a017 0%, #facc15 50%, #d4a017 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .divider {
+            width: 80px;
+            height: 3px;
+            background: #d4a017;
+        }
+
+        /* Cycling word animation (home page only) */
+        .cycle-word {
+            display: inline-block;
+            min-width: 200px;
+            padding-bottom: 0.15em;
+            transition: opacity 300ms ease;
+        }
+        .cycle-word.fade-out {
+            opacity: 0;
+        }
+
+        /* Nav transition */
+        .nav-scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(212, 160, 23, 0.15);
+        }
+
+        /* Video styling */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: rgba(10, 10, 10, 0.3);
+            border-radius: 0.5rem;
+            transition: background 200ms ease;
+            border: none;
+            padding: 0;
+        }
+        .video-overlay:hover {
+            background: rgba(10, 10, 10, 0.15);
+        }
+        .video-overlay svg {
+            transition: transform 200ms ease;
+        }
+        .video-overlay:hover svg {
+            transform: scale(1.1);
+        }
+
+        /* Form focus styles */
+        .form-input:focus {
+            outline: none;
+            border-color: #d4a017;
+            box-shadow: 0 0 0 2px rgba(212, 160, 23, 0.25);
+        }
+
+        /* Focus ring for keyboard navigation */
+        :focus-visible {
+            outline: 2px solid #d4a017;
+            outline-offset: 2px;
+        }
+
+        /* Active nav link */
+        .nav-active {
+            color: #d4a017;
+        }
+    </style>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Free State Party",
+        "description": "A private club for liberty-minded free staters in New Hampshire.",
+        "url": "https://freestate.party",
+        "areaServed": {
+            "@type": "State",
+            "name": "New Hampshire"
+        }
+    }
+    </script>
+
+    <!-- Analytics -->
+    <script defer data-domain="freestate.party" src="https://plausible.freestate.party/js/script.js"></script>
+
+    <!-- fsp-app auth widget (populates #fsp-user-slot for signed-in users) -->
+    <script src="https://freestate.party/embed/auth-widget.js" async></script>
+</head>
+<body class="bg-dark-900 text-dark-100 antialiased min-h-screen flex flex-col">
+
+    <!-- Skip to content -->
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:bg-gold-500 focus:text-dark-900 focus:px-4 focus:py-2 focus:rounded">Skip to content</a>
+
+    <!-- ========== NAVIGATION ========== -->
+    <header id="nav" class="fixed top-0 left-0 right-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-300 bg-dark-900/80 backdrop-blur-sm">
+        <nav class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <!-- Wordmark -->
+            <a href="../" class="font-display font-bold text-lg sm:text-xl text-dark-50 tracking-tight flex items-center">
+                <img src="../img/logo.svg" alt="Free State Party" width="28" height="28" class="mr-2 inline-block">
+                Free State <span class="text-gold-500 ml-1">Party</span>
+            </a>
+
+            <!-- Right Side: Desktop nav items + always-visible auth slot + mobile menu button -->
+            <div class="flex items-center gap-4 md:gap-8">
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../events/" class="text-dark-200 hover:text-gold-500 transition-colors">Events</a>
+                    <a href="../about/" class="text-dark-200 hover:text-gold-500 transition-colors">About</a>
+                    <div class="flex items-center gap-3 ml-2 pl-4 border-l border-dark-700"><a href="https://x.com/freestatepty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on X" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a> <a href="https://www.youtube.com/@freestateparty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on YouTube" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a></div>
+                </div>
+
+                <!-- Auth widget slot (populated by /embed/auth-widget.js for signed-in users; empty:hidden so anonymous state takes no space) -->
+                <div id="fsp-user-slot" class="flex items-center empty:hidden"></div>
+
+                <!-- Mobile Menu Button -->
+                <button id="menu-toggle" class="md:hidden p-2 text-dark-200 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+                <svg id="menu-icon-open" class="w-6 h-6" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <svg id="menu-icon-close" class="w-6 h-6 hidden" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-dark-900/95 backdrop-blur-lg border-t border-dark-700 px-4 pb-6">
+            <div class="flex flex-col gap-1 pt-4 text-base font-medium">
+                <a href="../events/" class="mobile-link py-3 px-4 text-dark-200 hover:text-gold-500 rounded-lg transition-colors">Events</a>
+                <a href="../about/" class="mobile-link py-3 px-4 text-dark-200 hover:text-gold-500 rounded-lg transition-colors">About</a>
+                <div class="flex items-center gap-4 px-4 pt-4 mt-2 border-t border-dark-700"><a href="https://x.com/freestatepty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on X" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a> <a href="https://www.youtube.com/@freestateparty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on YouTube" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== PAGE CONTENT ========== -->
+    <main id="main" class="flex-grow">
+    
+    <picture>
+        <source media="(max-width: 640px)" srcset="../img/visit/is-it-real-vertical.jpg" width="1024" height="1536">
+        <img src="../img/visit/is-it-real.jpg" alt="A scorched, collapsing wasteland on one side of a wall; a green, thriving New Hampshire crowned by a gleaming citadel on the other. Caption: Is it real?" width="1448" height="1086" class="w-full h-auto block">
+    </picture>
+
+    <section class="px-6 pt-12 pb-16 md:pt-16 md:pb-20 bg-dark-800">
+        <div class="max-w-3xl mx-auto">
+            <div class="divider mb-6"></div>
+            <h1 class="font-display text-4xl md:text-5xl font-bold leading-tight mb-4">
+                <span class="text-dark-50">There&#x27;s only one way to know.</span>
+            </h1>
+            <p class="font-display text-2xl md:text-3xl italic gold-gradient mb-8">Come for a Free State vacation.</p>
+            <p class="text-lg md:text-xl text-dark-200 leading-relaxed mb-4">See for yourself if New Hampshire is what they say it is. Our team will help you plan a trip and make introductions.</p>
+            <p class="text-base md:text-lg text-dark-300 italic mb-10">(So long as you&#x27;re worthy.)</p>
+            <a href="#plan" class="inline-block bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">Talk to us</a>
+        </div>
+    </section>
+
+    <section class="px-6 py-12 md:py-16">
+        <div class="max-w-5xl mx-auto">
+            <figure>
+                <img src="../img/visit/independence-inn.jpg" alt="The Independence Inn in New Hampshire &mdash; a white colonial inn with green shutters and a Live Free or Die flag, framed by spring trees." loading="lazy" width="1000" height="750" class="w-full aspect-video object-cover rounded-lg border border-dark-700">
+                <figcaption class="mt-3 text-center text-sm text-dark-400">The Independence Inn in Strafford</figcaption>
+            </figure>
+        </div>
+    </section>
+
+    <section class="px-6 pb-16 md:pb-20">
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-dark-900 border border-dark-700 rounded-lg p-6">
+                <h2 class="font-display text-xl md:text-2xl font-bold text-gold-500 mb-4">You&#x27;ll find</h2>
+                <div class="text-dark-200 leading-relaxed">
+                    <ul class="list-disc pl-5 space-y-2 marker:text-gold-500">
+                    <li>The thick of the country's liberty movement</li>
+                    <li>Free staters who fight for what you believe</li>
+                    <li>Liberty lived, not theorized</li>
+                    <li>Substance, not another pamphlet</li>
+                </ul>
+                </div>
+            </div>
+            <div class="bg-dark-900 border border-dark-700 rounded-lg p-6">
+                <h2 class="font-display text-xl md:text-2xl font-bold text-gold-500 mb-4">You&#x27;ll do</h2>
+                <div class="text-dark-200 leading-relaxed">
+                    <ul class="list-disc pl-5 space-y-2 marker:text-gold-500">
+                    <li>Show up to real events, not another group chat</li>
+                    <li>Pull up a chair at our weekly meetup</li>
+                    <li>Meet the people doing the work</li>
+                    <li>Settle in person what arguments never could</li>
+                </ul>
+                </div>
+            </div>
+            <div class="bg-dark-900 border border-dark-700 rounded-lg p-6">
+                <h2 class="font-display text-xl md:text-2xl font-bold text-gold-500 mb-4">The tour</h2>
+                <div class="text-dark-200 leading-relaxed">
+                    <ul class="list-disc pl-5 space-y-2 marker:text-gold-500">
+                    <li>Seacoast</li>
+                    <li>Lakes</li>
+                    <li>Mountains</li>
+                    <li>Rivers</li>
+                    <li>Farmlands</li>
+                    <li>Country roads</li>
+                    <li>Cities</li>
+                </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="plan" class="px-6 py-16 md:py-20 bg-dark-800 text-center">
+        <div class="max-w-2xl mx-auto">
+            <div class="divider mb-6 mx-auto"></div>
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-dark-50 mb-4">Talk to us.</h2>
+            <p class="text-lg text-dark-200 leading-relaxed mb-10">We&#x27;ll get to know you a bit, answer your questions, then build a visit tailored to you.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="mailto:contact@freestate.party?subject=Free%20State%20visit&amp;body=%28tell%20us%20a%20few%20sentences%20about%20yourself%29" class="inline-block bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-8 py-4 rounded-lg transition-colors min-h-[48px]">Email</a>
+                <a href="https://x.com/freestatepty" target="_blank" rel="noopener noreferrer" class="inline-block border border-dark-600 hover:border-gold-700/50 text-dark-100 font-bold text-lg px-8 py-4 rounded-lg transition-colors min-h-[48px]">DM on X</a>
+                <a href="https://signal.me/#p/+16035127630" target="_blank" rel="noopener noreferrer" class="inline-block border border-dark-600 hover:border-gold-700/50 text-dark-100 font-bold text-lg px-8 py-4 rounded-lg transition-colors min-h-[48px]">DM on Signal</a>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="px-6 py-12 border-t border-dark-800">
+        <div class="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <a href="../" class="font-display text-lg text-dark-50 flex items-center">
+                <img src="../img/logo.svg" alt="Free State Party" width="24" height="24" class="mr-2 inline-block">
+                Free State <span class="text-gold-500 ml-1">Party</span>
+            </a>
+            <div class="flex items-center gap-6 text-sm text-dark-300">
+                <a href="../events/" class="hover:text-dark-200 transition-colors">Events</a>
+                <a href="../about/" class="hover:text-dark-200 transition-colors">About</a>
+                <a href="../business/" class="hover:text-dark-200 transition-colors">Business</a>
+                <a href="https://x.com/freestatepty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on X" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a> <a href="https://www.youtube.com/@freestateparty" target="_blank" rel="noopener noreferrer" aria-label="Free State Party on YouTube" class="text-dark-300 hover:text-gold-500 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script>
+        // --- Mobile Nav Toggle ---
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const iconOpen = document.getElementById('menu-icon-open');
+        const iconClose = document.getElementById('menu-icon-close');
+
+        function closeMenu() {
+            mobileMenu.classList.add('hidden');
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
+
+        function openMenu() {
+            mobileMenu.classList.remove('hidden');
+            iconOpen.classList.add('hidden');
+            iconClose.classList.remove('hidden');
+            menuToggle.setAttribute('aria-expanded', 'true');
+        }
+
+        menuToggle.addEventListener('click', () => {
+            const isOpen = !mobileMenu.classList.contains('hidden');
+            if (isOpen) { closeMenu(); } else { openMenu(); }
+        });
+
+        // Escape key closes menu
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !mobileMenu.classList.contains('hidden')) {
+                closeMenu();
+                menuToggle.focus();
+            }
+        });
+
+        // Close mobile menu on link click
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => closeMenu());
+        });
+
+        // --- Nav Background on Scroll ---
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('nav-scrolled');
+            } else {
+                nav.classList.remove('nav-scrolled');
+            }
+        }, { passive: true });
+    </script>
+
+    <!-- Page-specific scripts -->
+    
+</body>
+</html>

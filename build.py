@@ -19,6 +19,7 @@ import os
 import re
 import shutil
 import urllib.request
+from urllib.parse import quote
 from datetime import datetime
 from html import escape
 from zoneinfo import ZoneInfo
@@ -52,19 +53,34 @@ def extract_meta(text):
     return meta
 
 
+def _format_inline(text):
+    """Apply inline markdown (links, bold, em, em-dashes) to a chunk of text."""
+    text = re.sub(r'\[(.+?)\]\((.+?)\)', r'<a href="\2" class="text-gold-500 hover:text-gold-400 transition-colors">\1</a>', text)
+    text = re.sub(r'\*\*(.+?)\*\*', r'<strong class="text-dark-50">\1</strong>', text)
+    text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', text)
+    text = text.replace(' — ', ' &mdash; ')
+    text = text.replace('— ', '&mdash; ')
+    return text
+
+
 def _paragraphs_to_html(text):
-    """Convert plain text to HTML paragraph tags."""
+    """Convert plain text to HTML. A block whose every line starts with '- '
+    becomes a <ul> list; every other block becomes a <p> paragraph."""
     html_parts = []
-    for p in re.split(r'\n\s*\n', text.strip()):
-        p = p.strip()
-        if not p:
+    for block in re.split(r'\n\s*\n', text.strip()):
+        block = block.strip()
+        if not block:
             continue
-        p = re.sub(r'\[(.+?)\]\((.+?)\)', r'<a href="\2" class="text-gold-500 hover:text-gold-400 transition-colors">\1</a>', p)
-        p = re.sub(r'\*\*(.+?)\*\*', r'<strong class="text-dark-50">\1</strong>', p)
-        p = re.sub(r'\*(.+?)\*', r'<em>\1</em>', p)
-        p = p.replace(' — ', ' &mdash; ')
-        p = p.replace('— ', '&mdash; ')
-        html_parts.append(f'<p>{p}</p>')
+        lines = [l.strip() for l in block.split('\n') if l.strip()]
+        if lines and all(l.startswith('- ') for l in lines):
+            items = '\n                    '.join(
+                f'<li>{_format_inline(l[2:].strip())}</li>' for l in lines
+            )
+            html_parts.append(
+                f'<ul class="list-disc pl-5 space-y-2 marker:text-gold-500">\n                    {items}\n                </ul>'
+            )
+        else:
+            html_parts.append(f'<p>{_format_inline(block)}</p>')
     return '\n                '.join(html_parts)
 
 
@@ -743,6 +759,112 @@ def build():
         base_path=''
     )
 
+    # --- Page: /visit/ (unlisted in nav, public — "Porcupine Vacation" pitch) ---
+    visit_text = read_file(os.path.join(CONTENT_DIR, 'visit.md'))
+    visit_meta = extract_meta(visit_text)
+    _, visit_sections = parse_sections(visit_text)
+
+    visit_columns_html = ''
+    for sec_title, sec_body in visit_sections:
+        visit_columns_html += f'''
+            <div class="bg-dark-900 border border-dark-700 rounded-lg p-6">
+                <h2 class="font-display text-xl md:text-2xl font-bold text-gold-500 mb-4">{escape(sec_title)}</h2>
+                <div class="text-dark-200 leading-relaxed">
+                    {sec_body}
+                </div>
+            </div>'''
+
+    # Contact buttons — email always, X DM from footer, Signal only if a real link is set
+    contact_email = visit_meta.get('contact_email', '')
+    visit_x_url = footer_meta.get('x_url', '')
+    visit_signal_url = visit_meta.get('signal_url', '')
+    contact_buttons = []
+    if contact_email:
+        mailto = f'mailto:{contact_email}'
+        params = []
+        if visit_meta.get('email_subject'):
+            params.append('subject=' + quote(visit_meta['email_subject']))
+        if visit_meta.get('email_body'):
+            params.append('body=' + quote(visit_meta['email_body']))
+        if params:
+            mailto += '?' + '&'.join(params)
+        contact_buttons.append(
+            f'<a href="{escape(mailto)}" class="inline-block bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-8 py-4 rounded-lg transition-colors min-h-[48px]">Email</a>'
+        )
+    if visit_x_url.startswith(('https://', 'http://')):
+        contact_buttons.append(
+            f'<a href="{escape(visit_x_url)}" target="_blank" rel="noopener noreferrer" class="inline-block border border-dark-600 hover:border-gold-700/50 text-dark-100 font-bold text-lg px-8 py-4 rounded-lg transition-colors min-h-[48px]">DM on X</a>'
+        )
+    if visit_signal_url.startswith(('https://', 'http://')):
+        contact_buttons.append(
+            f'<a href="{escape(visit_signal_url)}" target="_blank" rel="noopener noreferrer" class="inline-block border border-dark-600 hover:border-gold-700/50 text-dark-100 font-bold text-lg px-8 py-4 rounded-lg transition-colors min-h-[48px]">DM on Signal</a>'
+        )
+    contact_buttons_html = '\n                '.join(contact_buttons)
+
+    intro_note = visit_meta.get('intro_note', '')
+    visit_intro_note = (
+        f'<p class="text-base md:text-lg text-dark-300 italic mb-10">{_format_inline(escape(intro_note))}</p>'
+        if intro_note else ''
+    )
+
+    visit_content = f'''
+    <picture>
+        <source media="(max-width: 640px)" srcset="{{{{base}}}}/img/visit/is-it-real-vertical.jpg" width="1024" height="1536">
+        <img src="{{{{base}}}}/img/visit/is-it-real.jpg" alt="A scorched, collapsing wasteland on one side of a wall; a green, thriving New Hampshire crowned by a gleaming citadel on the other. Caption: Is it real?" width="1448" height="1086" class="w-full h-auto block">
+    </picture>
+
+    <section class="px-6 pt-12 pb-16 md:pt-16 md:pb-20 bg-dark-800">
+        <div class="max-w-3xl mx-auto">
+            <div class="divider mb-6"></div>
+            <h1 class="font-display text-4xl md:text-5xl font-bold leading-tight mb-4">
+                <span class="text-dark-50">{escape(visit_meta.get('headline', 'Visit'))}</span>
+            </h1>
+            <p class="font-display text-2xl md:text-3xl italic gold-gradient mb-8">{escape(visit_meta.get('sub_headline', ''))}</p>
+            <p class="text-lg md:text-xl text-dark-200 leading-relaxed mb-4">{_format_inline(escape(visit_meta.get('intro', '')))}</p>
+            {visit_intro_note}
+            <a href="#plan" class="inline-block bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-lg px-10 py-4 rounded-lg transition-colors min-h-[48px]">Talk to us</a>
+        </div>
+    </section>
+
+    <section class="px-6 py-12 md:py-16">
+        <div class="max-w-5xl mx-auto">
+            <figure>
+                <img src="{{{{base}}}}/img/visit/independence-inn.jpg" alt="The Independence Inn in New Hampshire &mdash; a white colonial inn with green shutters and a Live Free or Die flag, framed by spring trees." loading="lazy" width="1000" height="750" class="w-full aspect-video object-cover rounded-lg border border-dark-700">
+                <figcaption class="mt-3 text-center text-sm text-dark-400">The Independence Inn in Strafford</figcaption>
+            </figure>
+        </div>
+    </section>
+
+    <section class="px-6 pb-16 md:pb-20">
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">{visit_columns_html}
+        </div>
+    </section>
+
+    <section id="plan" class="px-6 py-16 md:py-20 bg-dark-800 text-center">
+        <div class="max-w-2xl mx-auto">
+            <div class="divider mb-6 mx-auto"></div>
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-dark-50 mb-4">{escape(visit_meta.get('cta_heading', 'Plan the trip.'))}</h2>
+            <p class="text-lg text-dark-200 leading-relaxed mb-10">{_format_inline(escape(visit_meta.get('cta_body', '')))}</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                {contact_buttons_html}
+            </div>
+        </div>
+    </section>'''
+
+    visit_html = build_page(
+        base,
+        page_title=visit_meta['title'],
+        page_description=visit_meta['description'],
+        og_title=visit_meta.get('og_title', visit_meta['title']),
+        page_content=visit_content,
+        active_nav=None,
+        is_subdir=True,
+        og_url=f'{BASE_URL}/visit/',
+        og_image=visit_meta.get('og_image', ''),
+        noindex=visit_meta.get('noindex', '').strip().lower() == 'true',
+        footer=footer_meta
+    )
+
     # --- Write all pages ---
     # Root page stays as index.html; all others become <name>/index.html for clean URLs
     pages = {
@@ -751,6 +873,7 @@ def build():
         'events/index.html': events_html_page,
         'business/index.html': business_html,
         'founding/index.html': founding_html,
+        'visit/index.html': visit_html,
         '404.html': notfound_html,
     }
 
