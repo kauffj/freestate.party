@@ -368,11 +368,13 @@ def _og_image_tag(og_image):
 
 def _render_minimal_page(template, page_title, page_description, og_title,
                          page_content, page_scripts='', og_url='', og_image='',
-                         noindex=False, is_subdir=False, base_path=None):
+                         noindex=False, is_subdir=False, base_path=None,
+                         og_description=''):
     """Render a page using the minimal template (no nav/footer)."""
     html = template
     html = html.replace('{{page_title}}', page_title)
     html = html.replace('{{page_description}}', page_description)
+    html = html.replace('{{og_description}}', og_description or page_description)
     noindex_tag = '\n    <meta name="robots" content="noindex, nofollow">' if noindex else ''
     html = html.replace('\n    {{noindex_tag}}', noindex_tag)
     html = html.replace('{{og_title}}', og_title)
@@ -391,11 +393,12 @@ def _render_minimal_page(template, page_title, page_description, og_title,
 
 def build_page(base, page_title, page_description, og_title, page_content,
                page_scripts='', active_nav=None, is_subdir=False, base_path=None,
-               og_url='', og_image='', noindex=False, footer=None):
+               og_url='', og_image='', noindex=False, footer=None, og_description=''):
     """Inject content into base template and return final HTML."""
     html = base
     html = html.replace('{{page_title}}', page_title)
     html = html.replace('{{page_description}}', page_description)
+    html = html.replace('{{og_description}}', og_description or page_description)
     noindex_tag = '\n    <meta name="robots" content="noindex, nofollow">' if noindex else ''
     html = html.replace('\n    {{noindex_tag}}', noindex_tag)
     html = html.replace('{{og_title}}', og_title)
@@ -861,6 +864,7 @@ def build():
         is_subdir=True,
         og_url=f'{BASE_URL}/visit/',
         og_image=visit_meta.get('og_image', ''),
+        og_description=visit_meta.get('og_description', ''),
         noindex=visit_meta.get('noindex', '').strip().lower() == 'true',
         footer=footer_meta
     )
