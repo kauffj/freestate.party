@@ -810,7 +810,7 @@ def build():
     visit_content = f'''
     <picture>
         <source media="(max-width: 640px)" srcset="{{{{base}}}}/img/visit/is-it-real-vertical.jpg" width="1024" height="1536">
-        <img src="{{{{base}}}}/img/visit/is-it-real.jpg" alt="A scorched, collapsing wasteland on one side of a wall; a green, thriving New Hampshire crowned by a gleaming citadel on the other. Caption: Is it real?" width="1448" height="1086" class="w-full h-auto block">
+        <img src="{{{{base}}}}/img/visit/is-it-real.jpg" alt="A scorched, collapsing wasteland on one side of a wall; a green, thriving New Hampshire crowned by a gleaming citadel on the other. Caption: Is it real?" width="1448" height="1086" class="block w-full max-h-[68vh] object-contain">
     </picture>
 
     <section class="px-6 pt-12 pb-16 md:pt-16 md:pb-20 bg-dark-800">
