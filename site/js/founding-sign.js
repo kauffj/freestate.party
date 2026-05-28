@@ -77,24 +77,16 @@
 
     function renderSigners(container, signers) {
         if (!container) return;
-        // Full re-render — fine for ~30 names.
+        // Full re-render — fine for ~30 names. One cell per signer, name only
+        // (no timestamps — the print has none, and the audit confirmed the column
+        // wants one name per cell, not a name+time row).
         container.textContent = '';
         for (var i = 0; i < signers.length; i++) {
             var s = signers[i];
-            var row = document.createElement('div');
-            row.className = 'signer';
-
-            var nameEl = document.createElement('span');
-            nameEl.className = 'signer-name';
-            nameEl.textContent = s.name || s.typed_name || '';
-
-            var timeEl = document.createElement('span');
-            timeEl.className = 'signer-time';
-            timeEl.textContent = formatTime(s.signed_at || s.created_at);
-
-            row.appendChild(nameEl);
-            row.appendChild(timeEl);
-            container.appendChild(row);
+            var cell = document.createElement('div');
+            cell.className = 'signer-cell';
+            cell.textContent = s.name || s.typed_name || '';
+            container.appendChild(cell);
         }
     }
 

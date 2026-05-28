@@ -208,13 +208,16 @@
     }
     .signer-cell {
         padding: 0.4rem 0.9rem;
-        font-family: var(--display-font);
+        font-family: var(--body-font);
         font-style: italic;
         font-weight: 500;
         font-size: 1.05rem;
         line-height: 1.6;
         color: var(--ink-primary);
         min-height: 1.8rem;
+    }
+    @media (max-width: 480px) {
+        .compact-masthead { letter-spacing: 0.35em; }
     }
     .signers-empty-hint {
         grid-column: 1 / -1;
