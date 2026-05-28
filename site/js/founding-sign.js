@@ -177,16 +177,28 @@
         return d.user || d.person || d || null;
     }
 
-    function userHasSigned(user, signers) {
-        if (!user || !signers || !signers.length) return false;
-        var uid = user.id || user.person_id;
-        var email = (user.email || '').toLowerCase();
+    // Signed-state WITHOUT identity. The signers response is {name, signedAt}
+    // with no stable id/email, and getMe() identity may be unavailable
+    // cross-origin. So we only claim "signed" when the user signed in THIS
+    // session (state.signedName, set on POST success) AND that exact name is
+    // present in the live list. On a fresh reload we cannot prove prior
+    // signing, so we default to showing the form — re-signing is idempotent
+    // server-side (returns success, no duplicate row), so that is harmless.
+    function hasSignedThisSession(state, signers) {
+        if (!state.signedName || !signers || !signers.length) return false;
         for (var i = 0; i < signers.length; i++) {
-            var s = signers[i];
-            if (uid && (s.person_id === uid || s.user_id === uid || s.id === uid)) return true;
-            if (email && (s.email || '').toLowerCase() === email) return true;
+            if ((signers[i].name || '') === state.signedName) return true;
         }
         return false;
+    }
+
+    function markSigned(form) {
+        if (!form) return;
+        var input = els['typed-name-input'];
+        var btn = els['sign-button'];
+        if (input) input.disabled = true;
+        if (btn) btn.disabled = true;
+        renderSignedBadge(form);
     }
 
     // --- Polling ------------------------------------------------------------
@@ -224,9 +236,10 @@
             btn.disabled = true;
             postSign(value).then(function (res) {
                 if (res.ok) {
-                    input.disabled = true;
-                    btn.disabled = true;
-                    renderSignedBadge(form);
+                    // Record the signed name for this session — drives the
+                    // "you signed" state without needing getMe() identity.
+                    state.signedName = value;
+                    markSigned(form);
                     // Force-refresh signers immediately.
                     refreshSigners(state, true);
                     return;
@@ -264,7 +277,10 @@
     function refreshSigners(state, immediate) {
         getSigners().then(function (res) {
             if (res.status === 404) {
-                // Not authorized / agreement not visible to this user.
+                // ELIGIBILITY GATE (deny-existence contract). The signers
+                // endpoint returns 404 if the caller is unauthenticated OR not
+                // a member of a group linked to this agreement. 404 here = not
+                // eligible → show the doesn't-exist view and stop.
                 show(els['doesnt-exist-view']);
                 hide(els['signers-list']);
                 hide(els['sign-form']);
@@ -281,22 +297,21 @@
             hide(els['doesnt-exist-view']);
             renderSigners(els['signers-list'], signers);
 
-            // Show/hide form based on signed state.
-            if (state.user) {
-                if (userHasSigned(state.user, signers)) {
-                    var form = els['sign-form'];
-                    if (form) {
-                        var input = els['typed-name-input'];
-                        var btn = els['sign-button'];
-                        if (input) input.disabled = true;
-                        if (btn) btn.disabled = true;
-                        renderSignedBadge(form);
-                    }
-                } else {
-                    show(els['sign-form']);
-                }
+            // ELIGIBILITY GATE — signers-200 IS the authorization signal.
+            // CONTRACT: GET /api/agreements/<slug>/signers enforces
+            // deny-existence — 404 if unauthenticated, 404 if not in a linked
+            // group, 200 ONLY when BOTH hold. So a 200 here proves the caller
+            // is authenticated AND in compact-signers, and is therefore
+            // eligible to sign. We gate the form on THIS, not on getMe():
+            // getMe() (/api/widget/me) is same-origin-only by design and is
+            // CORS-blocked from this static site, so it is display-only (see
+            // init) and must never gate the form. Showing the form here leaks
+            // no access — the POST sign endpoint independently re-checks group
+            // membership (403 for non-members).
+            if (hasSignedThisSession(state, signers)) {
+                markSigned(els['sign-form']);
             } else {
-                hide(els['sign-form']);
+                show(els['sign-form']);
             }
 
             schedulePoll(function () { refreshSigners(state); });
@@ -314,19 +329,20 @@
         // Default visible states (in case template defaults don't cover them).
         hide(els['doesnt-exist-view']);
 
-        var state = { user: null };
+        var state = { user: null, signedName: null };
 
+        // getMe() is DISPLAY-ONLY and best-effort. It hits /api/widget/me on
+        // the app origin, which is cross-origin from this static site and
+        // CORS-blocked by design (the auth widget calls it same-origin). Its
+        // result is used only for an optional display name; its failure must
+        // NEVER gate the form. The eligibility gate is the signers-200
+        // contract inside refreshSigners(). So we probe getMe() but always
+        // proceed to refreshSigners() regardless of whether it resolves.
         getMe().then(function (res) {
             state.user = extractUser(res);
-            if (!state.user) {
-                renderSignInCta(els['fsp-user-slot']);
-                hide(els['sign-form']);
-            }
-            refreshSigners(state);
-            attachSubmit(state);
-        }).catch(function (err) {
-            console.error('[founding-sign] auth probe failed', err);
-            // Still try to load signers — they may be visible to anon.
+        }).catch(function () {
+            // Swallow — cross-origin/CORS failure is expected and non-fatal.
+        }).then(function () {
             refreshSigners(state);
             attachSubmit(state);
         });
