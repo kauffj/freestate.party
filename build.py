@@ -740,6 +740,27 @@ def build():
         is_subdir=True
     )
 
+    # --- Page: /founding/sign/ (minimal, unlisted, noindex — compact sign-on for members) ---
+    # Template is a complete body fragment with its own <style>; minimal.html provides head + shell.
+    sign_text = read_file(os.path.join(CONTENT_DIR, 'founding-sign.md'))
+    sign_meta = extract_meta(sign_text)
+    sign_content = read_file(os.path.join(TEMPLATE_DIR, 'founding-sign.html'))
+    sign_scripts = (
+        '<script async src="https://freestate.party/embed/auth-widget.js"></script>\n'
+        '    <script src="{{base}}/js/founding-sign.js" defer></script>'
+    )
+
+    sign_html = _render_minimal_page(
+        minimal_base, sign_meta['title'], sign_meta['description'],
+        sign_meta.get('og_title', sign_meta['title']),
+        sign_content, sign_scripts,
+        og_url=f'{BASE_URL}/founding/sign/',
+        og_image=sign_meta.get('og_image', ''),
+        noindex=True,
+        is_subdir=True,
+        base_path='../..'
+    )
+
     # --- Page: 404 (minimal, like /founding/) ---
     notfound_text = read_file(os.path.join(CONTENT_DIR, '404.md'))
     notfound_meta = extract_meta(notfound_text)
@@ -877,6 +898,7 @@ def build():
         'events/index.html': events_html_page,
         'business/index.html': business_html,
         'founding/index.html': founding_html,
+        'founding/sign/index.html': sign_html,
         'visit/index.html': visit_html,
         '404.html': notfound_html,
     }
