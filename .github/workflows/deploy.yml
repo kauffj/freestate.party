@@ -1,16 +1,17 @@
-name: Deploy to freestate.party
+# RETIRED 2026-06-03 — the freestate.party marketing site was folded into the
+# fsp-app Next.js app (marketing-merge Stages 1–3) and cut over at nginx: the app
+# now serves / /about /business /events /visit /founding (and /saturday) directly.
+# This static-site build+deploy pipeline is no longer used. The push / daily-cron /
+# events-changed auto-triggers are removed so nothing rsyncs the dead site or reloads
+# nginx; the `deploy` job is also guarded with `if: false`. Steps kept for reference.
+name: Deploy to freestate.party (RETIRED)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
-  repository_dispatch:
-    types: [events-changed]
-  schedule:
-    - cron: '0 9 * * *'
 
 jobs:
   deploy:
+    if: false  # disabled — static site decommissioned; fsp-app serves these routes (cutover 2026-06-03)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
