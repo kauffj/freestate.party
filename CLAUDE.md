@@ -1,5 +1,9 @@
 # Free State Party — Site
 
+> **⚠️ ARCHIVED (2026-06-03):** This marketing site was folded into **fsp-app** and is
+> no longer deployed — `freestate.party` is served by the fsp-app Next.js app. **Do not
+> redeploy.** See [ARCHIVED.md](ARCHIVED.md). Everything below is historical.
+
 ## What This Is
 Multi-page site for the Free State Party — a private club for liberty-minded free staters in NH. Dennis Pratt runs concierge/vetting (anonymous on site).
 
