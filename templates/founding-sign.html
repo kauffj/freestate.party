@@ -1,0 +1,463 @@
+<!--
+  Founding Compact sign-on page template.
+
+  Structure mirrors the print render at
+    fsp-video-pipeline/video-pipeline/output/founders-summit/compact/FINAL.html
+  (variant A·2·III, Tabloid, 4 signature columns).
+
+  Three views, controlled by JS in /js/founding-sign.js (task 7):
+    1. Default — compact body + sig area with signers list + sign form
+    2. #doesnt-exist-view — shown when /api/groups/{id}/signers returns 404
+       (anonymous visitors and authed users not in compact-signers group)
+    3. #fsp-user-slot — populated by /embed/auth-widget.js
+
+  CSP-safe: no inline style attributes. Page-specific CSS lives in the
+  style block below; page-specific JS is loaded via the page_scripts slot in minimal.html.
+-->
+
+<!-- Additional fonts for this page (minimal.html loads Playfair + Inter; we also need Cinzel + Cormorant Garamond) -->
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+
+<style>
+    /* The HTML5 `hidden` attribute must beat layout-display rules. Without this,
+       any class that sets `display:` on a hidden element (e.g. .doesnt-exist) wins. */
+    [hidden] { display: none !important; }
+
+    /* Page-specific tokens — anchored to FSP brand (dark-900 #0a0a0a, gold-500 #d4a017). */
+    :root {
+        --ink-primary: #d4a017;
+        --ink-secondary: #c8b89a;
+        --ink-faded: rgba(212, 160, 23, 0.55);
+        --rule-color: rgba(212, 160, 23, 0.55);
+        --column-divider: rgba(212, 160, 23, 0.32);
+        --display-font: 'Playfair Display', Georgia, serif;
+        --body-font: 'Cormorant Garamond', Georgia, serif;
+        --small-font: 'Cinzel', Georgia, serif;
+    }
+
+    .compact-page {
+        background:
+            radial-gradient(ellipse at 50% 35%, rgba(212, 160, 23, 0.06) 0%, transparent 70%),
+            #0a0a0a;
+        color: var(--ink-primary);
+        font-family: var(--body-font);
+        min-height: 100vh;
+        position: relative;
+        padding: clamp(1rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2.5rem);
+    }
+
+    .compact-frame {
+        max-width: 1100px;
+        margin: 0 auto;
+        border: 1px solid rgba(212, 160, 23, 0.35);
+        position: relative;
+        padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3.5rem);
+    }
+    .compact-frame::before {
+        content: '';
+        position: absolute;
+        inset: 0.5rem;
+        border: 1px solid rgba(212, 160, 23, 0.18);
+        pointer-events: none;
+    }
+
+    /* HEADER */
+    .compact-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: 1.6rem;
+    }
+    .compact-header .logo {
+        opacity: 0.92;
+        margin-bottom: 0.6rem;
+    }
+    .compact-masthead {
+        font-family: var(--small-font);
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.5em;
+        text-transform: uppercase;
+        color: #d4a017;
+        margin-bottom: 0.4rem;
+    }
+    .compact-meta {
+        font-family: var(--body-font);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 1.05rem;
+        color: var(--ink-secondary);
+        letter-spacing: 0.02em;
+    }
+    .compact-header-rule {
+        width: 60%;
+        max-width: 320px;
+        height: 1px;
+        background: var(--rule-color);
+        margin: 1.2rem auto;
+        opacity: 0.6;
+    }
+
+    .compact-title {
+        font-family: var(--display-font);
+        font-weight: 700;
+        font-style: italic;
+        font-size: clamp(2.4rem, 6vw, 4.4rem);
+        line-height: 1.02;
+        text-align: center;
+        color: var(--ink-primary);
+        margin-bottom: 0.4rem;
+        letter-spacing: -0.005em;
+    }
+    .compact-subtitle {
+        font-family: var(--body-font);
+        font-style: italic;
+        font-size: 1.1rem;
+        color: var(--ink-faded);
+        text-align: center;
+        margin-bottom: 1.4rem;
+    }
+
+    /* BODY */
+    .compact-body {
+        padding: 0 clamp(0rem, 2vw, 1.5rem);
+        max-width: 100%;
+    }
+    .compact-body .preamble {
+        font-style: italic;
+        font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+        line-height: 1.55;
+        text-align: center;
+        margin-bottom: 1.4rem;
+        color: var(--ink-secondary);
+    }
+    .compact-body .bridge {
+        font-style: italic;
+        font-size: clamp(1rem, 2vw, 1.1rem);
+        text-align: center;
+        margin: 1.4rem 0 0.8rem 0;
+        color: var(--ink-secondary);
+    }
+    .compact-body .rules-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        margin-bottom: 0.4rem;
+    }
+    .compact-body .rule {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.7rem;
+        font-size: clamp(1rem, 2vw, 1.1rem);
+        line-height: 1.5;
+    }
+    .compact-body .rule-num {
+        font-family: var(--small-font);
+        font-weight: 700;
+        color: #d4a017;
+        min-width: 4.2rem;
+        padding-top: 0.05rem;
+        flex-shrink: 0;
+    }
+    .compact-body .rule-num-rom {
+        font-family: var(--display-font);
+        font-style: italic;
+        font-weight: 600;
+        color: var(--ink-primary);
+        min-width: 2.4rem;
+    }
+    .compact-body .rule-text {
+        flex: 1;
+        color: var(--ink-primary);
+    }
+
+    /* SIG AREA */
+    .compact-sig-rule {
+        height: 1px;
+        background: var(--rule-color);
+        margin: 2rem 0 0 0;
+        opacity: 0.5;
+    }
+    .compact-sig-area {
+        padding: 1.75rem 0 0.5rem 0;
+    }
+    .compact-sig-heading {
+        font-family: var(--body-font);
+        font-style: italic;
+        font-size: 1.1rem;
+        color: var(--ink-faded);
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    .signers-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0;
+        min-height: 14rem;
+    }
+    @media (min-width: 540px) {
+        .signers-grid { grid-template-columns: repeat(2, 1fr); }
+        .signer-cell:nth-child(n+2) { border-left: 1.5px solid var(--column-divider); }
+        .signer-cell:nth-child(2n+1) { border-left: none; }
+    }
+    @media (min-width: 860px) {
+        .signers-grid { grid-template-columns: repeat(4, 1fr); }
+        .signer-cell { border-left: 1.5px solid var(--column-divider) !important; }
+        .signer-cell:nth-child(4n+1) { border-left: none !important; }
+    }
+    .signer-cell {
+        padding: 0.4rem 0.9rem;
+        font-family: var(--body-font);
+        font-style: italic;
+        font-weight: 500;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: var(--ink-primary);
+        min-height: 1.8rem;
+    }
+    @media (max-width: 480px) {
+        .compact-masthead { letter-spacing: 0.35em; }
+    }
+    .signers-empty-hint {
+        grid-column: 1 / -1;
+        text-align: center;
+        font-style: italic;
+        color: var(--ink-faded);
+        font-size: 0.95rem;
+        padding: 1.5rem 0;
+    }
+
+    /* SIGN FORM */
+    .sign-form-wrap {
+        max-width: 520px;
+        margin: 2.5rem auto 1rem auto;
+        padding: 1.75rem clamp(1rem, 3vw, 2rem);
+        border-top: 1px solid var(--rule-color);
+    }
+    .sign-form-heading {
+        font-family: var(--display-font);
+        font-style: italic;
+        font-weight: 500;
+        font-size: 1.5rem;
+        color: var(--ink-primary);
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    .sign-form-hint {
+        font-family: var(--body-font);
+        font-style: italic;
+        font-size: 1rem;
+        color: var(--ink-secondary);
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    .typed-name-input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--rule-color);
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-style: italic;
+        font-weight: 500;
+        font-size: 1.75rem;
+        color: var(--ink-primary);
+        text-align: center;
+        padding: 0.6rem 0.5rem;
+        outline: none;
+        transition: border-color 200ms ease;
+    }
+    .typed-name-input::placeholder {
+        color: var(--ink-faded);
+        font-style: italic;
+    }
+    .typed-name-input:focus {
+        border-bottom-color: #d4a017;
+    }
+    .sign-button {
+        display: block;
+        margin: 1.5rem auto 0 auto;
+        background: #d4a017;
+        color: #0a0a0a;
+        font-family: 'Cinzel', Georgia, serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        padding: 0.85rem 2.5rem;
+        border: none;
+        border-radius: 2px;
+        cursor: pointer;
+        transition: background 200ms ease, transform 100ms ease;
+        min-height: 48px;
+    }
+    .sign-button:hover {
+        background: #facc15;
+    }
+    .sign-button:active {
+        transform: translateY(1px);
+    }
+    .sign-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .sign-form-error {
+        text-align: center;
+        font-family: var(--body-font);
+        font-style: italic;
+        color: #e07a5f;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        min-height: 1.2rem;
+    }
+    .sign-form-signed {
+        text-align: center;
+        font-family: var(--display-font);
+        font-style: italic;
+        color: var(--ink-primary);
+        font-size: 1.3rem;
+        padding: 1rem 0;
+    }
+
+    /* AUTH SLOT (top right anchor) */
+    .auth-bar {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    /* DOESN'T-EXIST VIEW */
+    .doesnt-exist {
+        min-height: 70vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 3rem 1.5rem;
+        gap: 1.25rem;
+    }
+    .doesnt-exist-title {
+        font-family: var(--display-font);
+        font-weight: 700;
+        font-style: italic;
+        font-size: clamp(2rem, 5vw, 3rem);
+        color: var(--ink-primary);
+    }
+    .doesnt-exist-text {
+        font-family: var(--body-font);
+        font-style: italic;
+        font-size: 1.15rem;
+        color: var(--ink-secondary);
+        max-width: 28rem;
+        line-height: 1.5;
+    }
+
+    /* FOOTER MARK */
+    .compact-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding: 0 0.5rem;
+        font-family: var(--small-font);
+        font-weight: 500;
+        font-size: 0.7rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--ink-faded);
+    }
+    .compact-footer .gold {
+        color: #d4a017;
+    }
+</style>
+
+<div class="compact-page">
+
+    <!-- Auth widget slot: populated by /embed/auth-widget.js for signed-in users.
+         empty:hidden so anonymous state takes no space. -->
+    <div id="fsp-user-slot" class="auth-bar empty:hidden"></div>
+
+    <!-- Default view: compact + signers + sign form (visible to compact-signers members).
+         JS in /js/founding-sign.js shows/hides #sign-form-content based on group/sign state. -->
+    <div id="compact-view" class="compact-frame">
+
+        <header class="compact-header">
+            <img class="logo" src="{{base}}/img/logo.svg" alt="Free State Party" width="68" height="68">
+            <div class="compact-masthead">The Free State Party</div>
+            <div class="compact-meta">Founders Summit &middot; Manchester, New Hampshire &middot; May 29, 2026</div>
+            <div class="compact-header-rule"></div>
+            <h1 class="compact-title">The Founding Compact</h1>
+            <p class="compact-subtitle">in witness whereof we set our hands</p>
+        </header>
+
+        <section class="compact-body">
+
+            <p class="preamble">The Party is a private club in which you participate voluntarily. A central thesis of the Party is that Membership selection is as much, or more important, than written rules. Thus, Rule zero:</p>
+
+            <div class="rules-block">
+                <div class="rule"><span class="rule-num">Rule&nbsp;0.</span><span class="rule-text">Act such that the club need not add more Rules.</span></div>
+            </div>
+
+            <p class="bridge">Civilization is not maintained by written rules alone, but by their fusion with culture and interpretation. Three additional founding Rules:</p>
+
+            <div class="rules-block">
+                <div class="rule"><span class="rule-num">Rule&nbsp;1.</span><span class="rule-text">Cherish liberty, family, truth, virtue and enterprise and reinforce them in your family, among club Members, in your community, and in New Hampshire.</span></div>
+                <div class="rule"><span class="rule-num">Rule&nbsp;2.</span><span class="rule-text">Cooperate; resolve conflicts internally.</span></div>
+                <div class="rule"><span class="rule-num">Rule&nbsp;3.</span><span class="rule-text">Respect confidentiality and privacy.</span></div>
+            </div>
+
+            <p class="bridge">The Party also makes Promises to Members:</p>
+
+            <div class="rules-block">
+                <div class="rule"><span class="rule-num rule-num-rom">i.</span><span class="rule-text">The Party will strive not to add more Rules. It will strive to remove incompatible Members.</span></div>
+                <div class="rule"><span class="rule-num rule-num-rom">ii.</span><span class="rule-text">All Party Officers are Members, and will be held to the same standards as Members. No one is above the Rules.</span></div>
+                <div class="rule"><span class="rule-num rule-num-rom">iii.</span><span class="rule-text">All Party decisions regarding Rules violations, Rules changes, and Membership removals will be communicated to Members via the Party application, with full, uncensored Member comment.</span></div>
+                <div class="rule"><span class="rule-num rule-num-rom">iv.</span><span class="rule-text">The Party will improve your ability to accomplish Rule One.</span></div>
+            </div>
+
+        </section>
+
+        <div class="compact-sig-rule"></div>
+
+        <section class="compact-sig-area">
+            <p class="compact-sig-heading">in witness whereof we set our hands</p>
+            <!-- Signers list — populated by /js/founding-sign.js. Empty by default; JS injects .signer-cell divs. -->
+            <div id="signers-list" class="signers-grid">
+                <div class="signers-empty-hint">Loading signatures&hellip;</div>
+            </div>
+        </section>
+
+        <!-- Sign form container — JS shows the form to compact-signers who haven't signed yet,
+             swaps in a "you've signed" confirmation after submit, hides entirely if user isn't eligible. -->
+        <div id="sign-form" class="sign-form-wrap" hidden>
+            <p class="sign-form-heading">Add your name</p>
+            <p class="sign-form-hint">Type your name as you wish it to appear among the signatories.</p>
+            <label class="sr-only" for="typed-name-input">Your name</label>
+            <input id="typed-name-input" class="typed-name-input" type="text" placeholder="Your name" autocomplete="name" maxlength="120">
+            <button id="sign-button" class="sign-button" type="button">Sign</button>
+            <p id="sign-form-error" class="sign-form-error" aria-live="polite"></p>
+        </div>
+
+        <footer class="compact-footer">
+            <span>Free State Party</span>
+            <span class="gold">freestate.party</span>
+        </footer>
+    </div>
+
+    <!-- Doesn't-exist view: shown when the signers endpoint returns 404
+         (anonymous visitor or authed user not in compact-signers group). -->
+    <div id="doesnt-exist-view" class="doesnt-exist" hidden>
+        <a href="{{base}}/" class="flex items-center gap-2 mb-4">
+            <img src="{{base}}/img/logo.svg" alt="Free State Party" width="32" height="32">
+            <span class="font-display text-xl text-white">Free State <span class="text-gold-500">Party</span></span>
+        </a>
+        <h1 class="doesnt-exist-title">This page doesn't exist.</h1>
+        <p class="doesnt-exist-text">Maybe it never did.</p>
+    </div>
+
+</div>
